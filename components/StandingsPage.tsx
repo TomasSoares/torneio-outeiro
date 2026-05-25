@@ -163,7 +163,7 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
   return (
     <div style={{ padding: '18px 16px 30px' }}>
       <div style={{ padding: '0 4px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <Eyebrow size={10} color={T.mute} T={T}>Bota de Ouro</Eyebrow>
+        <Eyebrow size={10} color={T.mute} T={T}>Melhor Marcador</Eyebrow>
         <Eyebrow size={10} color={T.mute2} T={T}>{list.reduce((s, x) => s + x.count, 0)} golos</Eyebrow>
       </div>
 
