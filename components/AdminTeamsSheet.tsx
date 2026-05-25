@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ThemeColors } from '@/lib/theme';
 import type { Team, Player } from '@/lib/types';
-import { useTeams, usePlayers, useReloadTeams, useReloadPlayers, useReloadMatches } from '@/lib/context';
+import { useTeams, usePlayers, useReloadTeams, useReloadPlayers, useReloadMatches, useToast } from '@/lib/context';
 import { Eyebrow } from './primitives';
 
 // ── helpers ────────────────────────────────────────────────
@@ -83,12 +83,12 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
   initial?: Team; isNew: boolean;
   onSave: () => void; onCancel: () => void; T: ThemeColors;
 }) {
+  const showToast = useToast();
   const [code, setCode] = useState(initial?.code ?? '');
   const [name, setName] = useState(initial?.name ?? '');
   const [short, setShort] = useState(initial?.short ?? '');
   const [group, setGroup] = useState<'A' | 'B'>(initial?.group ?? 'A');
   const [color, setColor] = useState(initial?.color ?? '#1a6b3a');
-  const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const valid = code.trim() && name.trim() && short.trim();
@@ -103,9 +103,10 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
       } else {
         await api(`/api/teams/${initial!.code}`, 'PATCH', { code: code.toUpperCase(), name, short, group, color });
       }
+      showToast(isNew ? 'Equipa adicionada' : 'Equipa guardada');
       onSave();
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : 'Erro');
+      showToast(e instanceof Error ? e.message : 'Erro ao guardar equipa', 'error');
     } finally {
       setSaving(false);
     }
@@ -142,7 +143,6 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
           <Input T={T} value={color} onChange={(e) => setColor(e.target.value)} placeholder="#1a6b3a" style={{ flex: 1 }} />
         </div>
       </Field>
-      {err && <div style={{ color: T.loss, fontSize: 12, marginBottom: 10 }}>{err}</div>}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <Btn T={T} onClick={onCancel}>Cancelar</Btn>
         <Btn T={T} primary onClick={() => submit()} disabled={!valid || saving}>
@@ -159,11 +159,11 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
   initial?: Player; isNew: boolean;
   onSave: () => void; onCancel: () => void; T: ThemeColors;
 }) {
+  const showToast = useToast();
   const teams = useTeams();
   const [name, setName] = useState(initial?.name ?? '');
   const [team, setTeam] = useState(initial?.team ?? '');
   const [n, setN] = useState(initial?.n ? String(initial.n) : '');
-  const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const valid = name.trim() && team && n;
@@ -180,9 +180,10 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
       } else {
         await api(`/api/players/${initial!.id}`, 'PATCH', { name, team, n: parseInt(n) });
       }
+      showToast(isNew ? 'Jogador adicionado' : 'Jogador guardado');
       onSave();
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : 'Erro');
+      showToast(e instanceof Error ? e.message : 'Erro ao guardar jogador', 'error');
     } finally {
       setSaving(false);
     }
@@ -199,7 +200,6 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
       <Field label="Número de camisola" T={T}>
         <Input T={T} type="number" min="1" max="99" value={n} onChange={(e) => setN(e.target.value)} placeholder="10" />
       </Field>
-      {err && <div style={{ color: T.loss, fontSize: 12, marginBottom: 10 }}>{err}</div>}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <Btn T={T} onClick={onCancel}>Cancelar</Btn>
         <Btn T={T} primary onClick={() => submit()} disabled={!valid || saving}>
@@ -213,6 +213,7 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
 // ── Main admin teams page ──────────────────────────────────
 
 export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeColors }) {
+  const showToast = useToast();
   const teams = useTeams();
   const players = usePlayers();
   const reloadTeams = useReloadTeams();
@@ -222,21 +223,25 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
   const [tab, setTab] = useState<'teams' | 'players'>('teams');
   const [editingTeam, setEditingTeam] = useState<Team | 'new' | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | 'new' | null>(null);
-  const [delErr, setDelErr] = useState<string | null>(null);
 
   async function deleteTeam(code: string) {
-    setDelErr(null);
     try {
       await api(`/api/teams/${code}`, 'DELETE');
       reloadTeams();
+      showToast('Equipa eliminada');
     } catch (e: unknown) {
-      setDelErr(e instanceof Error ? e.message : 'Erro ao eliminar');
+      showToast(e instanceof Error ? e.message : 'Erro ao eliminar equipa', 'error');
     }
   }
 
   async function deletePlayer(id: string) {
-    await api(`/api/players/${id}`, 'DELETE');
-    reloadPlayers();
+    try {
+      await api(`/api/players/${id}`, 'DELETE');
+      reloadPlayers();
+      showToast('Jogador eliminado');
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Erro ao eliminar jogador', 'error');
+    }
   }
 
   const teamList = Object.values(teams).sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
@@ -267,14 +272,6 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 40px' }} className="scroll-hide">
-
-        {/* Error banner */}
-        {delErr && (
-          <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(255,77,90,0.1)', border: '1px solid rgba(255,77,90,0.25)', borderRadius: 10, color: T.loss, fontSize: 13 }}>
-            {delErr}
-            <button onClick={() => setDelErr(null)} style={{ marginLeft: 10, background: 'none', border: 'none', color: T.loss, cursor: 'pointer', fontWeight: 700 }}>✕</button>
-          </div>
-        )}
 
         {/* ── Teams tab ──────────────────────────── */}
         {tab === 'teams' && (

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Match, Team, Player, Theme } from '@/lib/types';
 import { TEAMS, PLAYERS } from '@/lib/data';
 import { V2_DARK, V2_LIGHT } from '@/lib/theme';
 import { AppCtx } from '@/lib/context';
+import { ToastBar, type ToastState } from './primitives';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
@@ -24,7 +25,10 @@ async function apiCall(url: string, method: string, body?: unknown) {
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error ?? 'Erro de servidor');
+  }
   return res.json();
 }
 
@@ -40,8 +44,16 @@ export function App() {
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
   const [showAddMatch, setShowAddMatch] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [toast, setToast] = useState<ToastState>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const T = theme === 'light' ? V2_LIGHT : V2_DARK;
+
+  const showToast = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ msg, type });
+    toastTimer.current = setTimeout(() => setToast(null), 3200);
+  }, []);
 
   const reloadTeams = useCallback(() => {
     fetch('/api/teams').then((r) => r.json()).then((d) => { if (d && typeof d === 'object' && !d.error) setTeams(d); }).catch(console.error);
@@ -95,24 +107,39 @@ export function App() {
   const maxJornada = useMemo(() => matches.reduce((mx, m) => Math.max(mx, m.jornada), 0), [matches]);
 
   async function saveMatch(updated: Match) {
-    await apiCall(`/api/matches/${updated.id}`, 'PATCH', updated);
-    setMatches(matches.map((m) => (m.id === updated.id ? updated : m)));
-    setEditMatchId(null);
+    try {
+      await apiCall(`/api/matches/${updated.id}`, 'PATCH', updated);
+      setMatches(matches.map((m) => (m.id === updated.id ? updated : m)));
+      setEditMatchId(null);
+      showToast(updated.played ? 'Resultado guardado' : 'Resultado anulado');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Erro ao guardar', 'error');
+    }
   }
   async function deleteMatch() {
-    await apiCall(`/api/matches/${editMatchId}`, 'DELETE');
-    setMatches(matches.filter((m) => m.id !== editMatchId));
-    setEditMatchId(null);
+    try {
+      await apiCall(`/api/matches/${editMatchId}`, 'DELETE');
+      setMatches(matches.filter((m) => m.id !== editMatchId));
+      setEditMatchId(null);
+      showToast('Jogo eliminado');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Erro ao eliminar', 'error');
+    }
   }
   async function addMatch(newMatch: Match) {
-    await apiCall('/api/matches', 'POST', newMatch);
-    const next = [...matches, newMatch].sort((a, b) => {
-      if (a.jornada !== b.jornada) return a.jornada - b.jornada;
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      return a.time.localeCompare(b.time);
-    });
-    setMatches(next);
-    setShowAddMatch(false);
+    try {
+      await apiCall('/api/matches', 'POST', newMatch);
+      const next = [...matches, newMatch].sort((a, b) => {
+        if (a.jornada !== b.jornada) return a.jornada - b.jornada;
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+      });
+      setMatches(next);
+      setShowAddMatch(false);
+      showToast('Jogo adicionado');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Erro ao adicionar jogo', 'error');
+    }
   }
 
   const sharedNavProps = {
@@ -134,7 +161,7 @@ export function App() {
   );
 
   return (
-    <AppCtx.Provider value={{ teams, players, reloadTeams, reloadPlayers, reloadMatches }}>
+    <AppCtx.Provider value={{ teams, players, reloadTeams, reloadPlayers, reloadMatches, showToast }}>
       <div style={{ minHeight: '100dvh', background: T.bg }}>
         {isDesktop ? (
           <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: T.bg }}>
@@ -159,7 +186,7 @@ export function App() {
         )}
 
         {showLogin && (
-          <LoginSheet T={T} onClose={() => setShowLogin(false)} onLogin={() => { setIsAdmin(true); setShowLogin(false); }} />
+          <LoginSheet T={T} onClose={() => setShowLogin(false)} onLogin={() => { setIsAdmin(true); setShowLogin(false); showToast('Sessão iniciada'); }} />
         )}
         {editingMatch && (
           <EditMatchSheet T={T} match={editingMatch} onClose={() => setEditMatchId(null)} onSave={saveMatch} onDelete={deleteMatch} />
@@ -170,6 +197,8 @@ export function App() {
         {page === 'admin' && isAdmin && (
           <AdminTeamsPage T={T} onClose={() => setPage('table')} />
         )}
+
+        <ToastBar toast={toast} T={T} />
       </div>
     </AppCtx.Provider>
   );

@@ -4,6 +4,39 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useTeams } from '@/lib/context';
 import type { ThemeColors } from '@/lib/theme';
 
+export type ToastState = { msg: string; type: 'success' | 'error' } | null;
+
+export function ToastBar({ toast, T }: { toast: ToastState; T: ThemeColors }) {
+  if (!toast) return null;
+  const isErr = toast.type === 'error';
+  return (
+    <div
+      style={{
+        position: 'fixed', bottom: 96, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 200, pointerEvents: 'none',
+        animation: 'slideUp 220ms cubic-bezier(0.2,0.8,0.2,1)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '10px 16px', borderRadius: 100,
+          background: isErr ? 'rgba(255,77,90,0.12)' : T.limeDim,
+          border: `1px solid ${isErr ? 'rgba(255,77,90,0.4)' : T.lime + '55'}`,
+          color: isErr ? '#ff4d5a' : T.lime,
+          fontSize: 13, fontWeight: 600, letterSpacing: -0.1,
+          whiteSpace: 'nowrap',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <span style={{ fontSize: 15 }}>{isErr ? '✕' : '✓'}</span>
+        {toast.msg}
+      </div>
+    </div>
+  );
+}
+
 export function Badge({ code, size = 32, T }: { code: string; size?: number; T: ThemeColors }) {
   const teams = useTeams();
   const team = teams[code];
@@ -11,14 +44,14 @@ export function Badge({ code, size = 32, T }: { code: string; size?: number; T: 
     <div
       style={{
         width: size, height: size, borderRadius: size / 4,
-        background: team.color,
+        background: team?.color ?? T.mute2,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontWeight: 700, color: '#fff', fontSize: size * 0.34, letterSpacing: -0.3,
         flexShrink: 0,
         boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
       }}
     >
-      {team.code}
+      {team?.code ?? code}
     </div>
   );
 }
