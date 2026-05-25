@@ -12,7 +12,8 @@ export function ToastBar({ toast, T }: { toast: ToastState; T: ThemeColors }) {
   return (
     <div
       style={{
-        position: 'fixed', bottom: 96, left: '50%', transform: 'translateX(-50%)',
+        position: 'fixed', bottom: 96, left: 0, right: 0,
+        display: 'flex', justifyContent: 'center',
         zIndex: 200, pointerEvents: 'none',
         animation: 'slideUp 220ms cubic-bezier(0.2,0.8,0.2,1)',
       }}
