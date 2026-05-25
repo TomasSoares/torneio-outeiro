@@ -33,14 +33,9 @@ export function App() {
   const [teams, setTeams] = useState<Record<string, Team>>(TEAMS);
   const [players, setPlayers] = useState<Record<string, Player>>(PLAYERS);
   const [page, setPage] = useState<Page>('table');
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    try { return localStorage.getItem(SESSION_KEY) === '1'; } catch { return false; }
-  });
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'dark';
-    try { return (localStorage.getItem(THEME_KEY) as Theme) || 'dark'; } catch { return 'dark'; }
-  });
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [theme, setTheme] = useState<Theme>('dark');
+  const [hydrated, setHydrated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
   const [showAddMatch, setShowAddMatch] = useState(false);
@@ -61,6 +56,14 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    try {
+      setIsAdmin(localStorage.getItem(SESSION_KEY) === '1');
+      setTheme((localStorage.getItem(THEME_KEY) as Theme) || 'dark');
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
     setIsDesktop(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
@@ -75,16 +78,18 @@ export function App() {
   }, [reloadTeams, reloadPlayers]);
 
   useEffect(() => {
+    if (!hydrated) return;
     try {
       if (isAdmin) localStorage.setItem(SESSION_KEY, '1');
       else localStorage.removeItem(SESSION_KEY);
     } catch {}
-  }, [isAdmin]);
+  }, [isAdmin, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
     document.body.style.background = T.bg;
-  }, [theme, T.bg]);
+  }, [theme, T.bg, hydrated]);
 
   const editingMatch = useMemo(() => matches.find((m) => m.id === editMatchId) ?? null, [matches, editMatchId]);
   const maxJornada = useMemo(() => matches.reduce((mx, m) => Math.max(mx, m.jornada), 0), [matches]);
