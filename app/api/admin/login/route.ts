@@ -21,7 +21,11 @@ export async function POST(req: Request) {
     )
   }
 
-  const { password } = await req.json()
+  let password: unknown
+  try { ({ password } = await req.json()) } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
+  if (typeof password !== 'string' || password.length === 0 || password.length > 200) {
+    return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
+  }
 
   if (password !== process.env.ADMIN_SECRET) {
     return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
