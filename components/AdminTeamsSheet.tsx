@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ThemeColors } from '@/lib/theme';
 import type { Team, Player } from '@/lib/types';
-import { useTeams, usePlayers, useReloadTeams, useReloadPlayers } from '@/lib/context';
+import { useTeams, usePlayers, useReloadTeams, useReloadPlayers, useReloadMatches } from '@/lib/context';
 import { Eyebrow } from './primitives';
 
 // ── helpers ────────────────────────────────────────────────
@@ -101,7 +101,7 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
       if (isNew) {
         await api('/api/teams', 'POST', { code: code.toUpperCase(), name, short, group, color });
       } else {
-        await api(`/api/teams/${initial!.code}`, 'PATCH', { name, short, group, color });
+        await api(`/api/teams/${initial!.code}`, 'PATCH', { code: code.toUpperCase(), name, short, group, color });
       }
       onSave();
     } catch (e: unknown) {
@@ -113,11 +113,9 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
 
   return (
     <form onSubmit={submit} style={{ padding: '16px 0' }}>
-      {isNew && (
-        <Field label="Código (4 letras)" T={T}>
-          <Input T={T} value={code} onChange={(e) => setCode(e.target.value.slice(0, 4))} placeholder="EX: CRV" autoFocus />
-        </Field>
-      )}
+      <Field label="Código (4 letras)" T={T}>
+        <Input T={T} value={code} onChange={(e) => setCode(e.target.value.slice(0, 4))} placeholder="EX: CRV" autoFocus={isNew} />
+      </Field>
       <Field label="Nome completo" T={T}>
         <Input T={T} value={name} onChange={(e) => setName(e.target.value)} placeholder="Os Carvalhos" />
       </Field>
@@ -219,6 +217,7 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
   const players = usePlayers();
   const reloadTeams = useReloadTeams();
   const reloadPlayers = useReloadPlayers();
+  const reloadMatches = useReloadMatches();
 
   const [tab, setTab] = useState<'teams' | 'players'>('teams');
   const [editingTeam, setEditingTeam] = useState<Team | 'new' | null>(null);
@@ -288,7 +287,7 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
                 <TeamForm
                   initial={editingTeam === 'new' ? undefined : editingTeam as Team}
                   isNew={editingTeam === 'new'}
-                  onSave={() => { reloadTeams(); setEditingTeam(null); }}
+                  onSave={() => { reloadTeams(); reloadMatches(); setEditingTeam(null); }}
                   onCancel={() => setEditingTeam(null)}
                   T={T}
                 />

@@ -8,6 +8,7 @@ interface Ctx {
   players: Record<string, Player>
   reloadTeams: () => void
   reloadPlayers: () => void
+  reloadMatches: () => void
 }
 
 const defaults: Ctx = {
@@ -15,6 +16,7 @@ const defaults: Ctx = {
   players: PLAYERS,
   reloadTeams: () => {},
   reloadPlayers: () => {},
+  reloadMatches: () => {},
 }
 
 export const AppCtx = createContext<Ctx>(defaults)
@@ -22,3 +24,4 @@ export const useTeams = () => useContext(AppCtx).teams
 export const usePlayers = () => useContext(AppCtx).players
 export const useReloadTeams = () => useContext(AppCtx).reloadTeams
 export const useReloadPlayers = () => useContext(AppCtx).reloadPlayers
+export const useReloadMatches = () => useContext(AppCtx).reloadMatches

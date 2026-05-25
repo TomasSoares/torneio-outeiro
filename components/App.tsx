@@ -56,6 +56,10 @@ export function App() {
     fetch('/api/players').then((r) => r.json()).then((d) => { if (d && typeof d === 'object' && !d.error) setPlayers(d); }).catch(console.error);
   }, []);
 
+  const reloadMatches = useCallback(() => {
+    fetch('/api/matches').then((r) => r.json()).then((d) => { if (Array.isArray(d)) setMatches(d); }).catch(console.error);
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
     setIsDesktop(mq.matches);
@@ -125,7 +129,7 @@ export function App() {
   );
 
   return (
-    <AppCtx.Provider value={{ teams, players, reloadTeams, reloadPlayers }}>
+    <AppCtx.Provider value={{ teams, players, reloadTeams, reloadPlayers, reloadMatches }}>
       <div style={{ minHeight: '100dvh', background: T.bg }}>
         {isDesktop ? (
           <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: T.bg }}>

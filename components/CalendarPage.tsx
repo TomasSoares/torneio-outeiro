@@ -64,6 +64,7 @@ export function CalendarPage({ matches, isAdmin, onEditMatch, onAddMatch, T }: P
 function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
   const teams = useTeams();
   const h = teams[match.home], a = teams[match.away];
+  if (!h || !a) return null;
   return (
     <div style={{ padding: '18px 16px 8px' }}>
       <div
@@ -195,7 +196,7 @@ function TeamLine({ code, winner, dimmed, T }: { code: string; winner: boolean; 
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <Badge code={code} size={22} T={T} />
       <div style={{ fontSize: 14, fontWeight: winner ? 600 : 500, color: dimmed ? T.mute : T.text, letterSpacing: -0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {team.name}
+        {team?.name ?? code}
       </div>
     </div>
   );
