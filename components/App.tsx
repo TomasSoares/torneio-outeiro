@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { Match, Theme } from '@/lib/types';
 import { V2_DARK, V2_LIGHT } from '@/lib/theme';
-import { INITIAL_MATCHES } from '@/lib/data';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
@@ -11,24 +10,24 @@ import { StandingsPage } from './StandingsPage';
 import { CalendarPage } from './CalendarPage';
 import { LoginSheet, EditMatchSheet, AddMatchSheet } from './AdminSheets';
 
-const STORAGE_KEY = 'torneio-outeiro-v2';
 const SESSION_KEY = 'torneio-outeiro-admin-v2';
 const THEME_KEY   = 'torneio-outeiro-theme-v2';
 
 type Page = 'table' | 'calendar';
 
-function loadLS<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch {
-    return fallback;
-  }
+async function apiCall(url: string, method: string, body?: unknown) {
+  const res = await fetch(url, {
+    method,
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
 export function App() {
-  const [matches, setMatches] = useState<Match[]>(() => loadLS(STORAGE_KEY, INITIAL_MATCHES));
+  const [matches, setMatches] = useState<Match[]>([]);
   const [page, setPage] = useState<Page>('table');
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -41,7 +40,6 @@ export function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
   const [showAddMatch, setShowAddMatch] = useState(false);
-  // Start as false (matches SSR), flip on client
   const [isDesktop, setIsDesktop] = useState(false);
 
   const T = theme === 'light' ? V2_LIGHT : V2_DARK;
@@ -54,7 +52,10 @@ export function App() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  useEffect(() => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(matches)); } catch {} }, [matches]);
+  useEffect(() => {
+    fetch('/api/matches').then((r) => r.json()).then(setMatches).catch(console.error);
+  }, []);
+
   useEffect(() => {
     try {
       if (isAdmin) localStorage.setItem(SESSION_KEY, '1');
@@ -69,15 +70,18 @@ export function App() {
   const editingMatch = useMemo(() => matches.find((m) => m.id === editMatchId) ?? null, [matches, editMatchId]);
   const maxJornada = useMemo(() => matches.reduce((mx, m) => Math.max(mx, m.jornada), 0), [matches]);
 
-  function saveMatch(updated: Match) {
+  async function saveMatch(updated: Match) {
+    await apiCall(`/api/matches/${updated.id}`, 'PATCH', updated);
     setMatches(matches.map((m) => (m.id === updated.id ? updated : m)));
     setEditMatchId(null);
   }
-  function deleteMatch() {
+  async function deleteMatch() {
+    await apiCall(`/api/matches/${editMatchId}`, 'DELETE');
     setMatches(matches.filter((m) => m.id !== editMatchId));
     setEditMatchId(null);
   }
-  function addMatch(newMatch: Match) {
+  async function addMatch(newMatch: Match) {
+    await apiCall('/api/matches', 'POST', newMatch);
     const next = [...matches, newMatch].sort((a, b) => {
       if (a.jornada !== b.jornada) return a.jornada - b.jornada;
       if (a.date !== b.date) return a.date.localeCompare(b.date);
@@ -85,12 +89,6 @@ export function App() {
     });
     setMatches(next);
     setShowAddMatch(false);
-  }
-  function resetData() {
-    if (confirm('Repor todos os dados originais?')) {
-      setMatches(INITIAL_MATCHES);
-      try { localStorage.removeItem(STORAGE_KEY); } catch {}
-    }
   }
 
   const sharedNavProps = {
@@ -124,20 +122,6 @@ export function App() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
             {pageContent}
           </div>
-          {isAdmin && !showLogin && !editingMatch && !showAddMatch && (
-            <button
-              onClick={resetData}
-              title="Repor dados de demonstração"
-              style={{
-                position: 'fixed', right: 24, bottom: 24,
-                width: 36, height: 36, borderRadius: '50%',
-                background: T.surf2, color: T.mute,
-                border: `1px solid ${T.line2}`,
-                fontSize: 15, fontWeight: 500,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.5)', opacity: 0.85,
-              }}
-            >↺</button>
-          )}
         </div>
       ) : (
         // ── Mobile: header + content + bottom nav ───────────────

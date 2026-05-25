@@ -131,14 +131,27 @@ function Btn({
 // ── Login sheet ────────────────────────────────────────────
 
 export function LoginSheet({ onClose, onLogin, T }: { onClose: () => void; onLogin: () => void; T: ThemeColors }) {
-  const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function submit(e?: FormEvent) {
+  async function submit(e?: FormEvent) {
     e?.preventDefault();
-    if (user.trim() === 'admin' && pass === 'admin') onLogin();
-    else setErr('Credenciais inválidas.');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass }),
+      });
+      if (res.ok) onLogin();
+      else setErr('Credenciais inválidas.');
+    } catch {
+      setErr('Erro de ligação.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -149,11 +162,8 @@ export function LoginSheet({ onClose, onLogin, T }: { onClose: () => void; onLog
       </div>
 
       <form onSubmit={submit}>
-        <Field label="Utilizador" T={T}>
-          <Input T={T} value={user} onChange={(e) => { setUser(e.target.value); setErr(null); }} placeholder="admin" autoCapitalize="off" autoCorrect="off" />
-        </Field>
         <Field label="Palavra-passe" T={T}>
-          <Input T={T} type="password" value={pass} onChange={(e) => { setPass(e.target.value); setErr(null); }} placeholder="••••••" />
+          <Input T={T} type="password" value={pass} onChange={(e) => { setPass(e.target.value); setErr(null); }} placeholder="••••••" autoFocus />
         </Field>
 
         {err && (
@@ -162,18 +172,10 @@ export function LoginSheet({ onClose, onLogin, T }: { onClose: () => void; onLog
           </div>
         )}
 
-        <Btn T={T} primary onClick={() => submit()}>Entrar</Btn>
+        <Btn T={T} primary onClick={() => submit()} disabled={loading}>
+          {loading ? 'A entrar…' : 'Entrar'}
+        </Btn>
       </form>
-
-      <div style={{ marginTop: 18, padding: '12px 14px', background: T.surf, border: `1px solid ${T.line}`, borderRadius: 10 }}>
-        <Eyebrow size={9} color={T.lime} T={T}>Demo</Eyebrow>
-        <div style={{ marginTop: 6, fontSize: 13, color: T.mute }}>
-          Credenciais{' '}
-          <span className="mono" style={{ color: T.text, background: T.surf2, padding: '2px 6px', borderRadius: 4, fontSize: 11 }}>admin</span>
-          {' '}/{' '}
-          <span className="mono" style={{ color: T.text, background: T.surf2, padding: '2px 6px', borderRadius: 4, fontSize: 11 }}>admin</span>
-        </div>
-      </div>
     </Sheet>
   );
 }
