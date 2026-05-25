@@ -11,7 +11,7 @@ export async function GET() {
         m.match_date::text AS date,
         m.match_time AS time,
         m.home_code AS home, m.away_code AS away,
-        m.played, m.home_score AS hs, m.away_score AS away_score,
+        m.played, m.home_score AS hs, m.away_score,
         m.venue,
         COALESCE(
           json_agg(
@@ -26,7 +26,7 @@ export async function GET() {
       ORDER BY m.jornada, m.match_date, m.match_time
     `)
 
-    const matches: Match[] = rows.map((r) => ({ ...r, as: r.away_score }))
+    const matches: Match[] = rows.map(({ away_score, ...r }) => ({ ...r, as: away_score }))
     return NextResponse.json(matches)
   } catch (err) {
     console.error(err)

@@ -53,7 +53,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    fetch('/api/matches').then((r) => r.json()).then(setMatches).catch(console.error);
+    fetch('/api/matches')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setMatches(data); })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
