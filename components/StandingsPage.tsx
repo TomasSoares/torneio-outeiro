@@ -98,16 +98,15 @@ function StandingsTab({
         <Eyebrow size={10} color={T.mute2} T={T}>{played}/{total} jogos</Eyebrow>
       </div>
 
-      {/* Column header */}
-      <div className="standings-row" style={{ padding: '6px 20px', display: 'grid', gap: 6, alignItems: 'center' }}>
-        <div /><div />
-        {['V', 'E', 'D', 'GM', 'GS', 'DG', 'PTS'].map((h) => (
-          <div key={h} className="mono" style={{ fontSize: 9, fontWeight: 500, color: T.mute2, textAlign: 'center', letterSpacing: 0.8 }}>{h}</div>
-        ))}
-      </div>
-
-      {/* Rows */}
+      {/* Column header + rows share the same outer padding */}
       <div style={{ padding: '0 16px' }}>
+        <div className="standings-row" style={{ padding: '6px 10px', display: 'grid', gap: 6, alignItems: 'center' }}>
+          <div /><div />
+          {['V', 'E', 'D', 'GM', 'GS', 'DG', 'PTS'].map((h) => (
+            <div key={h} className="mono" style={{ fontSize: 9, fontWeight: 500, color: T.mute2, textAlign: 'center', letterSpacing: 0.8 }}>{h}</div>
+          ))}
+        </div>
+
         {rows.map((r, i) => {
           const qualify = i < 2;
           return (
