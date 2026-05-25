@@ -136,20 +136,6 @@ export function App() {
             {pageContent}
           </div>
           <BottomNav page={page} onChange={setPage} T={T} />
-          {isAdmin && !showLogin && !editingMatch && !showAddMatch && (
-            <button
-              onClick={resetData}
-              title="Repor dados de demonstração"
-              style={{
-                position: 'absolute', right: 14, bottom: 88,
-                width: 34, height: 34, borderRadius: '50%',
-                background: T.surf2, color: T.mute,
-                border: `1px solid ${T.line2}`,
-                fontSize: 14, fontWeight: 500,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.5)', opacity: 0.85,
-              }}
-            >↺</button>
-          )}
         </div>
       )}
 

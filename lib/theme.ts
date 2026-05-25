@@ -42,4 +42,4 @@ export const V2_LIGHT = {
   loss:    '#c1303d',
 } as const;
 
-export type ThemeColors = typeof V2_DARK;
+export type ThemeColors = typeof V2_DARK | typeof V2_LIGHT;
