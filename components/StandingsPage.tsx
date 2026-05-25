@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import type { Match } from '@/lib/types';
 import type { ThemeColors } from '@/lib/theme';
 import { computeStandings, computeTopScorers } from '@/lib/helpers';
-import { TEAMS } from '@/lib/data';
+import { useTeams, usePlayers } from '@/lib/context';
 import { Badge, Eyebrow, LiveDot, Pill } from './primitives';
 
 interface Props { matches: Match[]; T: ThemeColors; }
@@ -46,6 +46,7 @@ export function StandingsPage({ matches, T }: Props) {
 }
 
 function GroupTabs({ group, onChange, T }: { group: 'A' | 'B'; onChange: (g: 'A' | 'B') => void; T: ThemeColors }) {
+  const teams = useTeams();
   return (
     <div style={{ display: 'flex', gap: 8, padding: '16px 20px 6px' }}>
       {(['A', 'B'] as const).map((g) => {
@@ -69,7 +70,7 @@ function GroupTabs({ group, onChange, T }: { group: 'A' | 'B'; onChange: (g: 'A'
               <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, marginTop: 4, letterSpacing: -1 }}>{g}</div>
             </div>
             <div className="mono" style={{ fontSize: 10, color: T.mute2, letterSpacing: 0.5 }}>
-              {Object.values(TEAMS).filter((t) => t.group === g).length} eq.
+              {Object.values(teams).filter((t) => t.group === g).length} eq.
             </div>
           </button>
         );
@@ -83,7 +84,8 @@ function StandingsTab({
 }: {
   group: 'A' | 'B'; setGroup: (g: 'A' | 'B') => void; matches: Match[]; T: ThemeColors;
 }) {
-  const rows = useMemo(() => computeStandings(group, matches), [group, matches]);
+  const teams = useTeams();
+  const rows = useMemo(() => computeStandings(group, matches, teams), [group, matches, teams]);
   const played = matches.filter((m) => m.group === group && m.played).length;
   const total  = matches.filter((m) => m.group === group).length;
 
@@ -153,7 +155,9 @@ function StandingsTab({
 }
 
 function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
-  const list = useMemo(() => computeTopScorers(matches), [matches]);
+  const teams = useTeams();
+  const players = usePlayers();
+  const list = useMemo(() => computeTopScorers(matches, players), [matches, players]);
   const top = list[0];
   const maxGoals = top?.count ?? 1;
 
@@ -169,7 +173,7 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
       <div style={{ marginTop: 18 }}>
         {list.slice(1).map((s, i) => {
           const pct = (s.count / maxGoals) * 100;
-          const team = TEAMS[s.player.team];
+          const team = teams[s.player.team];
           return (
             <div
               key={s.player.id}
@@ -209,7 +213,8 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
 }
 
 function TopScorerCard({ scorer, T }: { scorer: { player: { id: string; name: string; team: string; n: number }; count: number }; T: ThemeColors }) {
-  const team = TEAMS[scorer.player.team];
+  const teams = useTeams();
+  const team = teams[scorer.player.team];
   return (
     <div style={{ position: 'relative', overflow: 'hidden', background: T.surf, border: `1px solid ${T.line}`, borderRadius: 16, padding: 18 }}>
       <div style={{ position: 'absolute', top: -40, right: -30, width: 180, height: 180, background: `radial-gradient(circle, ${T.lime}33 0%, transparent 65%)`, pointerEvents: 'none' }} />

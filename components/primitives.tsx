@@ -1,11 +1,12 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from 'react';
-import { TEAMS } from '@/lib/data';
+import { useTeams } from '@/lib/context';
 import type { ThemeColors } from '@/lib/theme';
 
 export function Badge({ code, size = 32, T }: { code: string; size?: number; T: ThemeColors }) {
-  const team = TEAMS[code];
+  const teams = useTeams();
+  const team = teams[code];
   return (
     <div
       style={{

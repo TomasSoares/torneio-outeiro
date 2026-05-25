@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { Match } from '@/lib/types';
 import type { ThemeColors } from '@/lib/theme';
-import { TEAMS } from '@/lib/data';
+import { useTeams } from '@/lib/context';
 import { fmtDateLong, fmtDateShort, weekday } from '@/lib/helpers';
 import { Badge, Eyebrow, LiveDot, Pill } from './primitives';
 
@@ -62,7 +62,8 @@ export function CalendarPage({ matches, isAdmin, onEditMatch, onAddMatch, T }: P
 }
 
 function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
-  const h = TEAMS[match.home], a = TEAMS[match.away];
+  const teams = useTeams();
+  const h = teams[match.home], a = teams[match.away];
   return (
     <div style={{ padding: '18px 16px 8px' }}>
       <div
@@ -188,7 +189,8 @@ function MatchCard({ match, isAdmin, onEdit, T }: { match: Match; isAdmin: boole
 }
 
 function TeamLine({ code, winner, dimmed, T }: { code: string; winner: boolean; dimmed: boolean; T: ThemeColors }) {
-  const team = TEAMS[code];
+  const teams = useTeams();
+  const team = teams[code];
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <Badge code={code} size={22} T={T} />

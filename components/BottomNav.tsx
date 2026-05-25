@@ -2,20 +2,21 @@
 
 import type { ThemeColors } from '@/lib/theme';
 
-type Page = 'table' | 'calendar';
+type Page = 'table' | 'calendar' | 'admin';
 
 interface Props {
   page: Page;
   onChange: (p: Page) => void;
+  isAdmin: boolean;
   T: ThemeColors;
 }
 
-const ITEMS: { id: Page; label: string }[] = [
-  { id: 'table', label: 'Classificação' },
-  { id: 'calendar', label: 'Calendário' },
-];
-
-export function BottomNav({ page, onChange, T }: Props) {
+export function BottomNav({ page, onChange, isAdmin, T }: Props) {
+  const ITEMS: { id: Page; label: string }[] = [
+    { id: 'table', label: 'Classificação' },
+    { id: 'calendar', label: 'Calendário' },
+    ...(isAdmin ? [{ id: 'admin' as Page, label: 'Equipas' }] : []),
+  ];
   return (
     <div
       style={{

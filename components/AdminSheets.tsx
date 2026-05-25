@@ -3,7 +3,7 @@
 import { useState, type CSSProperties, type ReactNode, type InputHTMLAttributes, type FormEvent } from 'react';
 import type { Match, FlatScorer } from '@/lib/types';
 import type { ThemeColors } from '@/lib/theme';
-import { TEAMS, PLAYERS } from '@/lib/data';
+import { useTeams, usePlayers } from '@/lib/context';
 import { fmtDateLong } from '@/lib/helpers';
 import { Badge, Eyebrow, LiveDot } from './primitives';
 
@@ -202,6 +202,8 @@ export function EditMatchSheet({
   const [adding, setAdding] = useState(false);
   const [delConfirm, setDelConfirm] = useState(false);
 
+  const TEAMS = useTeams();
+  const PLAYERS = usePlayers();
   const h = TEAMS[match.home], a = TEAMS[match.away];
   const hsN = parseInt(hs, 10), asN = parseInt(as, 10);
   const scoreValid = !isNaN(hsN) && !isNaN(asN) && hsN >= 0 && asN >= 0;
@@ -319,6 +321,7 @@ export function EditMatchSheet({
 }
 
 function ScoreSide({ team, score, setScore, T }: { team: string; score: string; setScore: (v: string) => void; T: ThemeColors }) {
+  const TEAMS = useTeams();
   const t = TEAMS[team];
   return (
     <div>
@@ -345,6 +348,8 @@ function ScoreSide({ team, score, setScore, T }: { team: string; score: string; 
 }
 
 function ScorerCol({ teamCode, scorers, scorerIdxs, onRemove, T }: { teamCode: string; scorers: FlatScorer[]; scorerIdxs: number[]; onRemove: (i: number) => void; T: ThemeColors }) {
+  const TEAMS = useTeams();
+  const PLAYERS = usePlayers();
   const t = TEAMS[teamCode];
   const agg = new Map<string, { p: string; items: { idx: number }[] }>();
   scorers.forEach((s, i) => {
@@ -387,6 +392,8 @@ function ScorerCol({ teamCode, scorers, scorerIdxs, onRemove, T }: { teamCode: s
 }
 
 function ScorerPicker({ homeTeam, awayTeam, onCancel, onPick, T }: { homeTeam: string; awayTeam: string; onCancel: () => void; onPick: (playerId: string, teamCode: string) => void; T: ThemeColors }) {
+  const TEAMS = useTeams();
+  const PLAYERS = usePlayers();
   const [team, setTeam] = useState(homeTeam);
   const players = Object.values(PLAYERS).filter((p) => p.team === team);
 
@@ -428,7 +435,7 @@ function ScorerPicker({ homeTeam, awayTeam, onCancel, onPick, T }: { homeTeam: s
                 }}
               >
                 <Badge code={tc} size={14} T={T} />
-                {TEAMS[tc].short}
+                {TEAMS[tc]?.short}
               </button>
             );
           })}
@@ -459,6 +466,7 @@ function ScorerPicker({ homeTeam, awayTeam, onCancel, onPick, T }: { homeTeam: s
 // ── Add match sheet ────────────────────────────────────────
 
 export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose: () => void; onAdd: (m: Match) => void; suggestedJornada: number; T: ThemeColors }) {
+  const TEAMS = useTeams();
   const [group, setGroup] = useState<'A' | 'B'>('A');
   const [home, setHome] = useState('');
   const [away, setAway] = useState('');

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import type { ThemeColors } from '@/lib/theme';
 import { Eyebrow, LiveDot } from './primitives';
 
-type Page = 'table' | 'calendar';
+type Page = 'table' | 'calendar' | 'admin';
 
 interface Props {
   page: Page;
@@ -136,6 +136,24 @@ export function Sidebar({ page, onChange, isAdmin, theme, onToggleTheme, onLogin
           {isLight ? 'Modo escuro' : 'Modo claro'}
         </button>
 
+        {isAdmin && (
+          <button
+            onClick={() => onChange('admin')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 12px', borderRadius: 10,
+              background: page === 'admin' ? T.limeDim : T.surf2,
+              color: page === 'admin' ? T.lime : T.text,
+              border: `1px solid ${page === 'admin' ? T.lime + '33' : T.line2}`,
+              fontWeight: 500, fontSize: 14, letterSpacing: -0.2,
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Gerir Equipas
+          </button>
+        )}
         {isAdmin ? (
           <button
             onClick={onLogout}

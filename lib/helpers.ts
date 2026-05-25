@@ -1,5 +1,5 @@
 import { PLAYERS, TEAMS } from './data';
-import type { Match, StandingRow, TopScorer } from './types';
+import type { Match, Player, StandingRow, Team, TopScorer } from './types';
 
 const WD = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const MO = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
@@ -23,8 +23,8 @@ export function weekday(iso: string): string {
   return WD[parseISO(iso).getDay()];
 }
 
-export function computeStandings(group: 'A' | 'B', matches: Match[]): StandingRow[] {
-  const teams = Object.values(TEAMS).filter((t) => t.group === group);
+export function computeStandings(group: 'A' | 'B', matches: Match[], teamsMap: Record<string, Team> = TEAMS): StandingRow[] {
+  const teams = Object.values(teamsMap).filter((t) => t.group === group);
   const rows: StandingRow[] = teams.map((t) => ({
     code: t.code, name: t.name, short: t.short,
     J: 0, V: 0, E: 0, D: 0, GM: 0, GS: 0, DG: 0, PTS: 0, form: [],
@@ -58,7 +58,7 @@ export function computeStandings(group: 'A' | 'B', matches: Match[]): StandingRo
   return rows;
 }
 
-export function computeTopScorers(matches: Match[]): TopScorer[] {
+export function computeTopScorers(matches: Match[], playersMap: Record<string, Player> = PLAYERS): TopScorer[] {
   const map = new Map<string, number>();
   for (const m of matches) {
     if (!m.played) continue;
@@ -67,7 +67,7 @@ export function computeTopScorers(matches: Match[]): TopScorer[] {
     }
   }
   const out: TopScorer[] = [...map.entries()]
-    .map(([p, c]) => ({ player: PLAYERS[p], count: c }))
+    .map(([p, c]) => ({ player: playersMap[p], count: c }))
     .filter((x) => x.player != null);
   out.sort((a, b) => b.count - a.count || a.player.name.localeCompare(b.player.name));
   return out;

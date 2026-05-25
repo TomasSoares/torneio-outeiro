@@ -1,24 +1,26 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import type { Match, Theme } from '@/lib/types';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import type { Match, Team, Player, Theme } from '@/lib/types';
+import { TEAMS, PLAYERS } from '@/lib/data';
 import { V2_DARK, V2_LIGHT } from '@/lib/theme';
+import { AppCtx } from '@/lib/context';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
 import { StandingsPage } from './StandingsPage';
 import { CalendarPage } from './CalendarPage';
+import { AdminTeamsPage } from './AdminTeamsSheet';
 import { LoginSheet, EditMatchSheet, AddMatchSheet } from './AdminSheets';
 
 const SESSION_KEY = 'torneio-outeiro-admin-v2';
 const THEME_KEY   = 'torneio-outeiro-theme-v2';
 
-type Page = 'table' | 'calendar';
+type Page = 'table' | 'calendar' | 'admin';
 
 async function apiCall(url: string, method: string, body?: unknown) {
   const res = await fetch(url, {
-    method,
-    credentials: 'same-origin',
+    method, credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -28,6 +30,8 @@ async function apiCall(url: string, method: string, body?: unknown) {
 
 export function App() {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [teams, setTeams] = useState<Record<string, Team>>(TEAMS);
+  const [players, setPlayers] = useState<Record<string, Player>>(PLAYERS);
   const [page, setPage] = useState<Page>('table');
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -44,6 +48,14 @@ export function App() {
 
   const T = theme === 'light' ? V2_LIGHT : V2_DARK;
 
+  const reloadTeams = useCallback(() => {
+    fetch('/api/teams').then((r) => r.json()).then((d) => { if (d && typeof d === 'object' && !d.error) setTeams(d); }).catch(console.error);
+  }, []);
+
+  const reloadPlayers = useCallback(() => {
+    fetch('/api/players').then((r) => r.json()).then((d) => { if (d && typeof d === 'object' && !d.error) setPlayers(d); }).catch(console.error);
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
     setIsDesktop(mq.matches);
@@ -53,11 +65,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    fetch('/api/matches')
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setMatches(data); })
-      .catch(console.error);
-  }, []);
+    fetch('/api/matches').then((r) => r.json()).then((d) => { if (Array.isArray(d)) setMatches(d); }).catch(console.error);
+    reloadTeams();
+    reloadPlayers();
+  }, [reloadTeams, reloadPlayers]);
 
   useEffect(() => {
     try {
@@ -65,6 +76,7 @@ export function App() {
       else localStorage.removeItem(SESSION_KEY);
     } catch {}
   }, [isAdmin]);
+
   useEffect(() => {
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
     document.body.style.background = T.bg;
@@ -95,11 +107,11 @@ export function App() {
   }
 
   const sharedNavProps = {
-    page, onChange: setPage,
+    page, onChange: (p: Page) => setPage(p),
     isAdmin, theme,
     onToggleTheme: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
     onLogin: () => setShowLogin(true),
-    onLogout: () => setIsAdmin(false),
+    onLogout: () => { setIsAdmin(false); if (page === 'admin') setPage('table'); },
     T,
   };
 
@@ -107,50 +119,49 @@ export function App() {
     <>
       {page === 'table' && <StandingsPage matches={matches} T={T} />}
       {page === 'calendar' && (
-        <CalendarPage
-          matches={matches} isAdmin={isAdmin}
-          onEditMatch={setEditMatchId} onAddMatch={() => setShowAddMatch(true)}
-          T={T}
-        />
+        <CalendarPage matches={matches} isAdmin={isAdmin} onEditMatch={setEditMatchId} onAddMatch={() => setShowAddMatch(true)} T={T} />
       )}
     </>
   );
 
   return (
-    <div style={{ minHeight: '100dvh', background: T.bg }}>
-      {isDesktop ? (
-        // ── Desktop: sidebar + content, full screen ─────────────
-        <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: T.bg }}>
-          <Sidebar {...sharedNavProps} />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-            {pageContent}
+    <AppCtx.Provider value={{ teams, players, reloadTeams, reloadPlayers }}>
+      <div style={{ minHeight: '100dvh', background: T.bg }}>
+        {isDesktop ? (
+          <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: T.bg }}>
+            <Sidebar {...sharedNavProps} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+              {pageContent}
+            </div>
           </div>
-        </div>
-      ) : (
-        // ── Mobile: header + content + bottom nav ───────────────
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: T.bg, position: 'relative', overflow: 'hidden' }}>
-          <Header
-            isAdmin={isAdmin} theme={theme}
-            onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            onLogin={() => setShowLogin(true)} onLogout={() => setIsAdmin(false)}
-            T={T}
-          />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {pageContent}
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: T.bg, position: 'relative', overflow: 'hidden' }}>
+            <Header
+              isAdmin={isAdmin} theme={theme}
+              onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onLogin={() => setShowLogin(true)} onLogout={() => { setIsAdmin(false); if (page === 'admin') setPage('table'); }}
+              T={T}
+            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {pageContent}
+            </div>
+            <BottomNav page={page} onChange={(p) => setPage(p)} isAdmin={isAdmin} T={T} />
           </div>
-          <BottomNav page={page} onChange={setPage} T={T} />
-        </div>
-      )}
+        )}
 
-      {showLogin && (
-        <LoginSheet T={T} onClose={() => setShowLogin(false)} onLogin={() => { setIsAdmin(true); setShowLogin(false); }} />
-      )}
-      {editingMatch && (
-        <EditMatchSheet T={T} match={editingMatch} onClose={() => setEditMatchId(null)} onSave={saveMatch} onDelete={deleteMatch} />
-      )}
-      {showAddMatch && (
-        <AddMatchSheet T={T} onClose={() => setShowAddMatch(false)} onAdd={addMatch} suggestedJornada={maxJornada + 1} />
-      )}
-    </div>
+        {showLogin && (
+          <LoginSheet T={T} onClose={() => setShowLogin(false)} onLogin={() => { setIsAdmin(true); setShowLogin(false); }} />
+        )}
+        {editingMatch && (
+          <EditMatchSheet T={T} match={editingMatch} onClose={() => setEditMatchId(null)} onSave={saveMatch} onDelete={deleteMatch} />
+        )}
+        {showAddMatch && (
+          <AddMatchSheet T={T} onClose={() => setShowAddMatch(false)} onAdd={addMatch} suggestedJornada={maxJornada + 1} />
+        )}
+        {page === 'admin' && isAdmin && (
+          <AdminTeamsPage T={T} onClose={() => setPage('table')} />
+        )}
+      </div>
+    </AppCtx.Provider>
   );
 }
