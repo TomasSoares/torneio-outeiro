@@ -1,0 +1,64 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+.scroll-hide::-webkit-scrollbar { display: none; }
+.scroll-hide { scrollbar-width: none; -ms-overflow-style: none; }
+
+.mono {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Standings table grid — wider name column on desktop */
+.standings-row {
+  grid-template-columns: 14px 1fr 20px 20px 20px 24px 24px 26px 30px;
+}
+@media (min-width: 768px) {
+  .standings-row {
+    grid-template-columns: 18px 1fr 28px 28px 28px 32px 32px 34px 38px;
+  }
+}
+
+/* Responsive content padding */
+@media (min-width: 768px) {
+  .page-content-pad { padding: 0 32px !important; }
+  .page-header-pad  { padding: 20px 32px !important; }
+}
+
+/* Sheet: full-width on mobile, centered panel on desktop */
+@media (min-width: 768px) {
+  .sheet-panel {
+    max-width: 560px !important;
+    border-radius: 20px !important;
+    margin: auto !important;
+    max-height: 85dvh !important;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
