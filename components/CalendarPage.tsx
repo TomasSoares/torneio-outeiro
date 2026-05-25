@@ -85,9 +85,9 @@ function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, marginTop: 22, alignItems: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Badge code={match.home} size={48} T={T} />
-              <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 10, letterSpacing: -0.2 }}>{h.short}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 10, letterSpacing: -0.2, textAlign: 'center' }}>{h.short}</div>
             </div>
             <div style={{ textAlign: 'center', padding: '0 6px' }}>
               <div className="mono" style={{ fontSize: 11, color: T.mute, letterSpacing: 1 }}>
@@ -96,9 +96,9 @@ function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
               <div style={{ fontSize: 28, fontWeight: 700, color: T.text, marginTop: 6, letterSpacing: -1 }}>{match.time}</div>
               <div style={{ width: 24, height: 2, background: T.lime, margin: '8px auto 0', borderRadius: 1 }} />
             </div>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Badge code={match.away} size={48} T={T} />
-              <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 10, letterSpacing: -0.2 }}>{a.short}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T.text, marginTop: 10, letterSpacing: -0.2, textAlign: 'center' }}>{a.short}</div>
             </div>
           </div>
 
