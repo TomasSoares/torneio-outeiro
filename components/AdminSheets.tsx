@@ -146,6 +146,7 @@ export function LoginSheet({ onClose, onLogin, T }: { onClose: () => void; onLog
         body: JSON.stringify({ password: pass }),
       });
       if (res.ok) onLogin();
+      else if (res.status === 429) setErr('Demasiadas tentativas. Tenta novamente em 15 minutos.');
       else setErr('Credenciais inválidas.');
     } catch {
       setErr('Erro de ligação.');
