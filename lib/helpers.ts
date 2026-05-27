@@ -1,5 +1,5 @@
 import { PLAYERS, TEAMS } from './data';
-import type { Match, Player, StandingRow, Team, TopScorer } from './types';
+import type { KOSlot, Match, Player, StandingRow, Team, TopScorer } from './types';
 
 const WD = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const MO = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
@@ -57,6 +57,114 @@ export function computeStandings(group: 'A' | 'B', matches: Match[], teamsMap: R
   );
   return rows;
 }
+
+// ---------------------------------------------------------------------------
+// Fase Final helpers
+// ---------------------------------------------------------------------------
+
+export type TournamentPhase = 'group' | 'knockout';
+
+/** A fase é knockout se existir pelo menos um jogo KO na BD. */
+export function detectPhase(matches: Match[]): TournamentPhase {
+  return matches.some((m) => m.round !== null) ? 'knockout' : 'group';
+}
+
+/**
+ * True quando o admin pode gerar a fase final:
+ * todos os jogos de grupo disputados E nenhum jogo KO ainda criado.
+ */
+export function canGenerateKO(matches: Match[]): boolean {
+  const group = matches.filter((m) => m.group !== null);
+  const ko    = matches.filter((m) => m.round !== null);
+  return group.length > 0 && group.every((m) => m.played) && ko.length === 0;
+}
+
+/**
+ * True quando o admin pode gerar a Final e o 3º/4º lugar:
+ * SF1 e SF2 disputados E Final ainda não existe.
+ */
+export function canGenerateFinals(matches: Match[]): boolean {
+  const sf1 = matches.find((m) => m.round === 'SF1');
+  const sf2 = matches.find((m) => m.round === 'SF2');
+  const f   = matches.find((m) => m.round === 'F');
+  return !!(sf1?.played && sf2?.played && !f);
+}
+
+export interface BracketData {
+  sf1Match: Match | null;
+  sf2Match: Match | null;
+  fMatch:   Match | null;
+  tpMatch:  Match | null;
+  sf1Home: KOSlot;
+  sf1Away: KOSlot;
+  sf2Home: KOSlot;
+  sf2Away: KOSlot;
+  fHome:   KOSlot;
+  fAway:   KOSlot;
+  tpHome:  KOSlot;
+  tpAway:  KOSlot;
+}
+
+/** Deriva a estrutura completa do bracket a partir dos jogos e standings. */
+export function buildBracket(matches: Match[], teamsMap: Record<string, Team> = TEAMS): BracketData {
+  const sf1 = matches.find((m) => m.round === 'SF1') ?? null;
+  const sf2 = matches.find((m) => m.round === 'SF2') ?? null;
+  const f   = matches.find((m) => m.round === 'F')   ?? null;
+  const tp  = matches.find((m) => m.round === '3P')  ?? null;
+
+  const standA = computeStandings('A', matches, teamsMap);
+  const standB = computeStandings('B', matches, teamsMap);
+
+  const shortOf = (code: string | null) => (code && teamsMap[code] ? teamsMap[code].short : code ?? '?');
+
+  // SF1: 1º A vs 2º B
+  const sf1Home: KOSlot = sf1
+    ? { code: sf1.home, label: `1º Gr. A · ${shortOf(sf1.home)}` }
+    : standA[0]
+      ? { code: standA[0].code, label: `1º Gr. A · ${standA[0].short}` }
+      : { code: null, label: '1º Grupo A' };
+
+  const sf1Away: KOSlot = sf1
+    ? { code: sf1.away, label: `2º Gr. B · ${shortOf(sf1.away)}` }
+    : standB[1]
+      ? { code: standB[1].code, label: `2º Gr. B · ${standB[1].short}` }
+      : { code: null, label: '2º Grupo B' };
+
+  // SF2: 1º B vs 2º A
+  const sf2Home: KOSlot = sf2
+    ? { code: sf2.home, label: `1º Gr. B · ${shortOf(sf2.home)}` }
+    : standB[0]
+      ? { code: standB[0].code, label: `1º Gr. B · ${standB[0].short}` }
+      : { code: null, label: '1º Grupo B' };
+
+  const sf2Away: KOSlot = sf2
+    ? { code: sf2.away, label: `2º Gr. A · ${shortOf(sf2.away)}` }
+    : standA[1]
+      ? { code: standA[1].code, label: `2º Gr. A · ${standA[1].short}` }
+      : { code: null, label: '2º Grupo A' };
+
+  // Final: vencedores das MF
+  const fHome: KOSlot = f
+    ? { code: f.home, label: `Venc. SF1 · ${shortOf(f.home)}` }
+    : { code: null, label: 'Vencedor SF1' };
+
+  const fAway: KOSlot = f
+    ? { code: f.away, label: `Venc. SF2 · ${shortOf(f.away)}` }
+    : { code: null, label: 'Vencedor SF2' };
+
+  // 3º/4º: perdedores das MF
+  const tpHome: KOSlot = tp
+    ? { code: tp.home, label: `Perd. SF1 · ${shortOf(tp.home)}` }
+    : { code: null, label: 'Perdedor SF1' };
+
+  const tpAway: KOSlot = tp
+    ? { code: tp.away, label: `Perd. SF2 · ${shortOf(tp.away)}` }
+    : { code: null, label: 'Perdedor SF2' };
+
+  return { sf1Match: sf1, sf2Match: sf2, fMatch: f, tpMatch: tp, sf1Home, sf1Away, sf2Home, sf2Away, fHome, fAway, tpHome, tpAway };
+}
+
+// ---------------------------------------------------------------------------
 
 export function computeTopScorers(matches: Match[], playersMap: Record<string, Player> = PLAYERS): TopScorer[] {
   const map = new Map<string, number>();

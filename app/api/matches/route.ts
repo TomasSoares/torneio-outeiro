@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server'
 import pool from '@/lib/db'
 import { isAdminRequest } from '@/lib/auth'
 import type { Match } from '@/lib/types'
-import { bad, isStr, isInt, isGroup, isDate, isTime, parseBody } from '@/lib/validate'
+import { bad, isStr, isInt, isGroup, isKORound, isDate, isTime, parseBody } from '@/lib/validate'
 
 export async function GET() {
   try {
     const { rows } = await pool.query(`
       SELECT
-        m.id, m.jornada, m."group",
+        m.id, m.jornada, m."group", m.round,
         m.match_date::text AS date,
         m.match_time AS time,
         m.home_code AS home, m.away_code AS away,
@@ -41,11 +41,16 @@ export async function POST(req: Request) {
   const [body, err] = await parseBody(req)
   if (err) return err
 
-  const { id, jornada, group, date, time, home, away, venue, played, hs, as: as_, scorers } = body
+  const { id, jornada, group, round, date, time, home, away, venue, played, hs, as: as_, scorers } = body
 
   if (!isStr(id, 20)) return bad('ID inválido')
   if (!isInt(jornada, 1, 50)) return bad('Jornada inválida (1–50)')
-  if (!isGroup(group)) return bad('Grupo inválido (A ou B)')
+
+  // Exatamente um de (group, round) deve ser fornecido
+  const hasGroup = isGroup(group)
+  const hasRound = isKORound(round)
+  if (hasGroup === hasRound) return bad('Especifique grupo (A/B) OU ronda eliminatória (SF1/SF2/F/3P), não ambos')
+
   if (!isDate(date)) return bad('Data inválida (YYYY-MM-DD)')
   if (!isTime(time)) return bad('Hora inválida (HH:MM)')
   if (!isStr(home, 4)) return bad('Equipa da casa inválida')
@@ -63,9 +68,9 @@ export async function POST(req: Request) {
   try {
     await client.query('BEGIN')
     await client.query(
-      `INSERT INTO matches (id, jornada, "group", match_date, match_time, home_code, away_code, played, home_score, away_score, venue)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-      [(id as string).trim(), jornada, group, date, time, (home as string).trim(), (away as string).trim(), played, hs ?? null, as_ ?? null, (venue as string).trim()]
+      `INSERT INTO matches (id, jornada, "group", round, match_date, match_time, home_code, away_code, played, home_score, away_score, venue)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+      [(id as string).trim(), jornada, hasGroup ? group : null, hasRound ? round : null, date, time, (home as string).trim(), (away as string).trim(), played, hs ?? null, as_ ?? null, (venue as string).trim()]
     )
     for (const s of (scorers as { p: string; t: string; c: number; min: number | null }[]) ?? []) {
       await client.query(

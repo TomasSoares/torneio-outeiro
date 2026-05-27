@@ -231,7 +231,11 @@ export function EditMatchSheet({
   }
 
   return (
-    <Sheet onClose={onClose} title={`${h.short} vs ${a.short}`} eyebrow={`Jornada ${match.jornada} · Grupo ${match.group}`} T={T}>
+    <Sheet onClose={onClose} title={`${h.short} vs ${a.short}`} eyebrow={
+      match.round
+        ? ({ SF1: 'Meia-Final 1', SF2: 'Meia-Final 2', F: 'Final', '3P': '3.º/4.º Lugar' } as Record<string, string>)[match.round] ?? match.round
+        : `Jornada ${match.jornada} · Grupo ${match.group}`
+    } T={T}>
       {/* Meta */}
       <div style={{ background: T.surf, border: `1px solid ${T.line}`, borderRadius: 12, padding: 14, marginBottom: 18, display: 'flex', justifyContent: 'space-between' }}>
         <div>
@@ -483,7 +487,7 @@ export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose
     onAdd({
       id: 'm_' + Math.random().toString(36).slice(2, 8),
       jornada: parseInt(jornada, 10) || 1,
-      group, date, time, home, away, venue,
+      group, round: null, date, time, home, away, venue,
       played: false, hs: null, as: null, scorers: [],
     });
   }

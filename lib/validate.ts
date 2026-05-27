@@ -17,6 +17,12 @@ export function isGroup(v: unknown): v is 'A' | 'B' {
   return v === 'A' || v === 'B'
 }
 
+const KO_ROUNDS = ['SF1', 'SF2', 'F', '3P'] as const
+
+export function isKORound(v: unknown): v is import('./types').KORound {
+  return typeof v === 'string' && (KO_ROUNDS as readonly string[]).includes(v)
+}
+
 export function isHex(v: unknown): v is string {
   return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
 }

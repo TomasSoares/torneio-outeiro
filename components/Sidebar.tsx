@@ -2,14 +2,16 @@
 
 import type { ReactNode } from 'react';
 import type { ThemeColors } from '@/lib/theme';
+import type { TournamentPhase } from '@/lib/helpers';
 import { Eyebrow, LiveDot } from './primitives';
 
-type Page = 'table' | 'calendar' | 'admin';
+type Page = 'table' | 'bracket' | 'calendar' | 'admin';
 
 interface Props {
   page: Page;
   onChange: (p: Page) => void;
   isAdmin: boolean;
+  phase: TournamentPhase;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
   onLogin: () => void;
@@ -43,12 +45,21 @@ function LoginIcon() {
   );
 }
 
-const NAV: { id: Page; label: string; icon: ReactNode }[] = [
-  { id: 'table',    label: 'Classificação', icon: <TableIcon /> },
-  { id: 'calendar', label: 'Calendário',    icon: <CalendarIcon /> },
-];
+function BracketIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h3v4H2M2 9h3v4H2M13 5h-3v2h3M13 11h-3v-2h3M5 5h3M5 11h3M8 5v6" />
+    </svg>
+  );
+}
 
-export function Sidebar({ page, onChange, isAdmin, theme, onToggleTheme, onLogin, onLogout, T }: Props) {
+export function Sidebar({ page, onChange, isAdmin, phase, theme, onToggleTheme, onLogin, onLogout, T }: Props) {
+  const NAV: { id: Page; label: string; icon: ReactNode }[] = [
+    phase === 'knockout'
+      ? { id: 'bracket', label: 'Fase Final',    icon: <BracketIcon /> }
+      : { id: 'table',   label: 'Classificação', icon: <TableIcon /> },
+    { id: 'calendar', label: 'Calendário', icon: <CalendarIcon /> },
+  ];
   const isLight = theme === 'light';
   return (
     <div

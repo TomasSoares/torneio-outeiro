@@ -81,7 +81,9 @@ function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
               <LiveDot color={T.lime} T={T} />
               <Eyebrow size={9} color={T.lime} T={T}>Próximo</Eyebrow>
             </div>
-            <Pill color={T.mute} bg={T.surf2} T={T}>J{match.jornada} · Gr. {match.group}</Pill>
+            <Pill color={T.mute} bg={T.surf2} T={T}>
+              {match.group ? `J${match.jornada} · Gr. ${match.group}` : (match.round === 'SF1' ? 'Meia-Final 1' : match.round === 'SF2' ? 'Meia-Final 2' : match.round === 'F' ? 'Final' : '3.º/4.º')}
+            </Pill>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, marginTop: 22, alignItems: 'center' }}>
@@ -153,7 +155,7 @@ function MatchCard({ match, isAdmin, onEdit, T }: { match: Match; isAdmin: boole
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div className="mono" style={{ fontSize: 10, color: T.mute2, letterSpacing: 0.8 }}>
-          {match.time} · Gr. {match.group}
+          {match.time} · {match.group ? `Gr. ${match.group}` : (match.round === 'SF1' ? 'MF1' : match.round === 'SF2' ? 'MF2' : match.round === 'F' ? 'Final' : '3º/4º')}
         </div>
         {played ? (
           <Pill color={T.mute2} bg="transparent" style={{ padding: '2px 0', border: 'none' }} T={T}>final</Pill>

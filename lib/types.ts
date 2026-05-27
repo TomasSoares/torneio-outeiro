@@ -19,10 +19,18 @@ export interface FlatScorer {
   min: number | null;
 }
 
+export type KORound = 'SF1' | 'SF2' | 'F' | '3P';
+
+export interface KOSlot {
+  code: string | null; // null = a definir (TBD)
+  label: string;       // e.g. "1º Grupo A", "Vencedor SF1"
+}
+
 export interface Match {
   id: string;
   jornada: number;
-  group: 'A' | 'B';
+  group: 'A' | 'B' | null; // null nos jogos da fase final
+  round: KORound | null;    // null nos jogos de grupo
   date: string;
   time: string;
   home: string;

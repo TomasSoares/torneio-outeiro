@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import pool from '@/lib/db'
 import { isAdminRequest } from '@/lib/auth'
-import { bad, isStr, isInt, isGroup, isDate, isTime, parseBody } from '@/lib/validate'
+import { bad, isStr, isInt, isGroup, isKORound, isDate, isTime, parseBody } from '@/lib/validate'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!await isAdminRequest()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -11,10 +11,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const [body, err] = await parseBody(req)
   if (err) return err
 
-  const { jornada, group, date, time, home, away, venue, played, hs, as: as_, scorers } = body
+  const { jornada, group, round, date, time, home, away, venue, played, hs, as: as_, scorers } = body
 
   if (!isInt(jornada, 1, 50)) return bad('Jornada inválida (1–50)')
-  if (!isGroup(group)) return bad('Grupo inválido (A ou B)')
+
+  // Exatamente um de (group, round) deve ser fornecido
+  const hasGroup = isGroup(group)
+  const hasRound = isKORound(round)
+  if (hasGroup === hasRound) return bad('Especifique grupo (A/B) OU ronda eliminatória (SF1/SF2/F/3P), não ambos')
+
   if (!isDate(date)) return bad('Data inválida (YYYY-MM-DD)')
   if (!isTime(time)) return bad('Hora inválida (HH:MM)')
   if (!isStr(home, 4)) return bad('Equipa da casa inválida')
@@ -34,9 +39,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     await client.query(
       `UPDATE matches SET
         played=$1, home_score=$2, away_score=$3, jornada=$4,
-        match_date=$5, match_time=$6, home_code=$7, away_code=$8, venue=$9, "group"=$10
-       WHERE id=$11`,
-      [played, hs ?? null, as_ ?? null, jornada, date, time, (home as string).trim(), (away as string).trim(), (venue as string).trim(), group, id]
+        match_date=$5, match_time=$6, home_code=$7, away_code=$8, venue=$9, "group"=$10, round=$11
+       WHERE id=$12`,
+      [played, hs ?? null, as_ ?? null, jornada, date, time, (home as string).trim(), (away as string).trim(), (venue as string).trim(), hasGroup ? group : null, hasRound ? round : null, id]
     )
     await client.query('DELETE FROM match_scorers WHERE match_id=$1', [id])
     for (const s of (scorers as { p: string; t: string; c: number; min: number | null }[]) ?? []) {

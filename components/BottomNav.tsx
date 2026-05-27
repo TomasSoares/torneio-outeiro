@@ -1,19 +1,25 @@
 'use client';
 
 import type { ThemeColors } from '@/lib/theme';
+import type { TournamentPhase } from '@/lib/helpers';
 
-type Page = 'table' | 'calendar' | 'admin';
+type Page = 'table' | 'bracket' | 'calendar' | 'admin';
 
 interface Props {
   page: Page;
   onChange: (p: Page) => void;
   isAdmin: boolean;
+  phase: TournamentPhase;
   T: ThemeColors;
 }
 
-export function BottomNav({ page, onChange, isAdmin, T }: Props) {
+export function BottomNav({ page, onChange, isAdmin, phase, T }: Props) {
+  const firstItem = phase === 'knockout'
+    ? { id: 'bracket' as Page, label: 'Fase Final' }
+    : { id: 'table'   as Page, label: 'Classificação' };
+
   const ITEMS: { id: Page; label: string }[] = [
-    { id: 'table', label: 'Classificação' },
+    firstItem,
     { id: 'calendar', label: 'Calendário' },
     ...(isAdmin ? [{ id: 'admin' as Page, label: 'Equipas' }] : []),
   ];
