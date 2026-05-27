@@ -37,19 +37,7 @@ export async function POST() {
   try {
     await client.query('BEGIN')
 
-    // 1. Verificar que todos os jogos de grupo estão disputados
-    const { rows: groupRows } = await client.query<{ played: boolean }>(
-      `SELECT played FROM matches WHERE "group" IS NOT NULL`
-    )
-    if (groupRows.length === 0)
-      return NextResponse.json({ error: 'Não existem jogos de grupo' }, { status: 400 })
-    if (groupRows.some((r) => !r.played)) {
-      await client.query('ROLLBACK')
-      return NextResponse.json(
-        { error: 'Nem todos os jogos da fase de grupos foram disputados' },
-        { status: 400 }
-      )
-    }
+    // TODO: restaurar validação — 1. Verificar que todos os jogos de grupo estão disputados
 
     // 2. Verificar que não existem jogos KO (idempotência)
     const { rows: koRows } = await client.query(

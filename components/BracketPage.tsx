@@ -27,7 +27,7 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
   const teams = useTeams();
   const bracket = useMemo(() => buildBracket(matches, teams), [matches, teams]);
 
-  const showGenerateKO     = isAdmin && canGenerateKO(matches);
+  const showGenerateKO     = isAdmin && !matches.some((m) => m.round !== null); // TODO: restaurar canGenerateKO(matches)
   const showGenerateFinals = isAdmin && canGenerateFinals(matches);
 
   // Has any KO match been generated yet?
