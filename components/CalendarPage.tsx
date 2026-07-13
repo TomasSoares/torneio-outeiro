@@ -133,7 +133,7 @@ function KOSection({ title, matches, isAdmin, onEditMatch, T }: { title: string;
   return (
     <div style={{ marginTop: 20, padding: '0 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ fontWeight: 700, fontSize: 22, color: T.text, letterSpacing: -0.8 }}>{title}</div>
           {!allPlayed && <Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill>}
         </div>
@@ -154,7 +154,7 @@ function Jornada({ num, matches, isAdmin, onEditMatch, T }: { num: number; match
   return (
     <div style={{ marginTop: 20, padding: '0 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ fontWeight: 700, fontSize: 22, color: T.text, letterSpacing: -0.8 }}>Jornada {num}</div>
           {!allPlayed && <Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill>}
         </div>
