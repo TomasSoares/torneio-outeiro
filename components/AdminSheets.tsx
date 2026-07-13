@@ -194,6 +194,9 @@ export function EditMatchSheet({
 }) {
   const [hs, setHs] = useState(match.hs == null ? '' : String(match.hs));
   const [as, setAs] = useState(match.as == null ? '' : String(match.as));
+  const [date, setDate] = useState(match.date);
+  const [time, setTime] = useState(match.time);
+  const [venue, setVenue] = useState(match.venue);
   const [scorers, setScorers] = useState<FlatScorer[]>(() =>
     (match.scorers ?? []).flatMap((s) =>
       Array.from({ length: s.c }, () => ({ p: s.p, t: s.t, min: s.min ?? null }))
@@ -227,7 +230,7 @@ export function EditMatchSheet({
       if (!m.has(key)) m.set(key, { p: s.p, t: s.t, c: 0, min: s.min });
       m.get(key)!.c += 1;
     }
-    onSave({ ...match, played: true, hs: hsN, as: asN, scorers: [...m.values()] });
+    onSave({ ...match, date, time, venue, played: true, hs: hsN, as: asN, scorers: [...m.values()] });
   }
 
   return (
@@ -237,15 +240,19 @@ export function EditMatchSheet({
         : `Jornada ${match.jornada} · Grupo ${match.group}`
     } T={T}>
       {/* Meta */}
-      <div style={{ background: T.surf, border: `1px solid ${T.line}`, borderRadius: 12, padding: 14, marginBottom: 18, display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
         <div>
-          <Eyebrow size={9} color={T.mute2} T={T}>Data · Hora</Eyebrow>
-          <div className="mono" style={{ marginTop: 4, fontSize: 13, color: T.text }}>{fmtDateLong(match.date)} · {match.time}</div>
+          <Eyebrow size={9} color={T.mute2} style={{ marginBottom: 6 }} T={T}>Data</Eyebrow>
+          <Input T={T} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <Eyebrow size={9} color={T.mute2} T={T}>Recinto</Eyebrow>
-          <div style={{ marginTop: 4, fontSize: 13, color: T.text }}>{match.venue}</div>
+        <div>
+          <Eyebrow size={9} color={T.mute2} style={{ marginBottom: 6 }} T={T}>Hora</Eyebrow>
+          <Input T={T} type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
+      </div>
+      <div style={{ marginBottom: 18 }}>
+        <Eyebrow size={9} color={T.mute2} style={{ marginBottom: 6 }} T={T}>Recinto</Eyebrow>
+        <Input T={T} value={venue} onChange={(e) => setVenue(e.target.value)} />
       </div>
 
       {/* Score inputs */}
@@ -476,7 +483,7 @@ export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose
   const [away, setAway] = useState('');
   const [date, setDate] = useState('2026-05-25');
   const [time, setTime] = useState('17:00');
-  const [venue, setVenue] = useState('Campo Municipal');
+  const [venue, setVenue] = useState('Saibreira');
   const [jornada, setJornada] = useState(String(suggestedJornada || 4));
 
   const teams = Object.values(TEAMS).filter((t) => t.group === group);

@@ -94,7 +94,7 @@ export async function POST() {
 
     // Data e hora placeholder — admin pode editar depois
     const sfDate  = '2026-06-07'
-    const sfVenue = 'Campo Municipal'
+    const sfVenue = 'Saibreira'
 
     await client.query(
       `INSERT INTO matches

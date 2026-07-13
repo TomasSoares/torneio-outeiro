@@ -62,7 +62,7 @@ export async function POST() {
 
     // Data placeholder — admin pode editar depois
     const fDate  = '2026-06-14'
-    const fVenue = 'Campo Municipal'
+    const fVenue = 'Saibreira'
 
     await client.query(
       `INSERT INTO matches
