@@ -13,16 +13,14 @@ interface Props {
   T: ThemeColors;
 }
 
-export function BottomNav({ page, onChange, isAdmin, phase, T }: Props) {
-  const firstItem = phase === 'knockout'
-    ? { id: 'bracket' as Page, label: 'Fase Final' }
-    : { id: 'table'   as Page, label: 'Classificação' };
-
+export function BottomNav({ page, onChange, isAdmin, phase: _phase, T }: Props) {
   const ITEMS: { id: Page; label: string }[] = [
-    firstItem,
+    { id: 'table',    label: 'Classificação' },
+    { id: 'bracket',  label: 'Fase Final' },
     { id: 'calendar', label: 'Calendário' },
     ...(isAdmin ? [{ id: 'admin' as Page, label: 'Equipas' }] : []),
   ];
+  const compact = ITEMS.length >= 4;
   return (
     <div
       style={{
@@ -46,8 +44,12 @@ export function BottomNav({ page, onChange, isAdmin, phase, T }: Props) {
               style={{
                 flex: 1, background: active ? T.lime : 'transparent',
                 color: active ? T.bg : T.mute,
-                border: 'none', padding: '10px 12px', borderRadius: 100,
-                fontSize: 13, fontWeight: active ? 600 : 500, letterSpacing: -0.1,
+                border: 'none',
+                padding: compact ? '8px 6px' : '10px 12px',
+                borderRadius: 100,
+                fontSize: compact ? 11 : 13,
+                fontWeight: active ? 600 : 500,
+                letterSpacing: compact ? -0.3 : -0.1,
               }}
             >
               {it.label}

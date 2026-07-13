@@ -156,7 +156,7 @@ export function LoginSheet({ onClose, onLogin, T }: { onClose: () => void; onLog
   }
 
   return (
-    <Sheet onClose={onClose} title="Entrar" eyebrow="Comissão de Festas" T={T}>
+    <Sheet onClose={onClose} title="Entrar" eyebrow="GJOL" T={T}>
       <div style={{ fontSize: 14, color: T.mute, lineHeight: 1.5, marginBottom: 22 }}>
         Sessão reservada à comissão organizadora.<br />
         Aqui podes lançar resultados e registar marcadores.

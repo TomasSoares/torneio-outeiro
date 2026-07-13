@@ -75,7 +75,7 @@ export function App() {
 
   useEffect(() => {
     try {
-      setIsAdmin(localStorage.getItem(SESSION_KEY) === '1');
+      setIsAdmin(sessionStorage.getItem(SESSION_KEY) === '1');
       setTheme((localStorage.getItem(THEME_KEY) as Theme) || 'dark');
     } catch {}
     setHydrated(true);
@@ -98,8 +98,8 @@ export function App() {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      if (isAdmin) localStorage.setItem(SESSION_KEY, '1');
-      else localStorage.removeItem(SESSION_KEY);
+      if (isAdmin) sessionStorage.setItem(SESSION_KEY, '1');
+      else sessionStorage.removeItem(SESSION_KEY);
     } catch {}
   }, [isAdmin, hydrated]);
 
@@ -182,7 +182,11 @@ export function App() {
     isAdmin, phase, theme,
     onToggleTheme: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
     onLogin: () => setShowLogin(true),
-    onLogout: () => { setIsAdmin(false); if (page === 'admin') setPage('table'); },
+    onLogout: () => {
+      fetch('/api/admin/login', { method: 'DELETE', credentials: 'same-origin' }).catch(() => {});
+      setIsAdmin(false);
+      if (page === 'admin') setPage('table');
+    },
     T,
   };
 

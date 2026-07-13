@@ -55,10 +55,9 @@ function BracketIcon() {
 
 export function Sidebar({ page, onChange, isAdmin, phase, theme, onToggleTheme, onLogin, onLogout, T }: Props) {
   const NAV: { id: Page; label: string; icon: ReactNode }[] = [
-    phase === 'knockout'
-      ? { id: 'bracket', label: 'Fase Final',    icon: <BracketIcon /> }
-      : { id: 'table',   label: 'Classificação', icon: <TableIcon /> },
-    { id: 'calendar', label: 'Calendário', icon: <CalendarIcon /> },
+    { id: 'table',    label: 'Classificação', icon: <TableIcon /> },
+    { id: 'bracket',  label: 'Fase Final',    icon: <BracketIcon /> },
+    { id: 'calendar', label: 'Calendário',    icon: <CalendarIcon /> },
   ];
   const isLight = theme === 'light';
   return (
