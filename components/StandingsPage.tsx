@@ -171,7 +171,6 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
 
       <div style={{ marginTop: 18 }}>
         {list.slice(1).map((s, i) => {
-          const pct = (s.count / maxGoals) * 100;
           const team = teams[s.player.team];
           return (
             <div
@@ -190,10 +189,7 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
                 <div style={{ fontWeight: 600, fontSize: 14, color: T.text, letterSpacing: -0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {s.player.name}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                  <div style={{ flex: 1, height: 3, background: T.surf2, borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: team.color, opacity: 0.85, borderRadius: 2 }} />
-                  </div>
+                <div style={{ marginTop: 4 }}>
                   <div className="mono" style={{ fontSize: 9, color: T.mute2, letterSpacing: 0.6 }}>{team.code} · #{s.player.n}</div>
                 </div>
               </div>
