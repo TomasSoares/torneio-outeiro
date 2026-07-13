@@ -40,7 +40,7 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
         <div>
           <Eyebrow size={10} color={T.mute} T={T}>Fase Final</Eyebrow>
           <div style={{ fontSize: 22, fontWeight: 700, color: T.text, letterSpacing: -0.8, marginTop: 4 }}>
-            Bracket
+            Eliminatórias
           </div>
         </div>
         <div style={{
@@ -49,7 +49,7 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
           color: T.lime, fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
           fontFamily: 'monospace',
         }}>
-          KNOCKOUT
+          ELIMINATÓRIAS
         </div>
       </div>
 
