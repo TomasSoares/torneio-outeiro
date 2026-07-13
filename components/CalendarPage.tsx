@@ -16,15 +16,19 @@ interface Props {
 }
 
 export function CalendarPage({ matches, isAdmin, onEditMatch, onAddMatch, T }: Props) {
-  const jornadas = useMemo(() => [...new Set(matches.map((m) => m.jornada))].sort((a, b) => a - b), [matches]);
-  const nextMatch = useMemo(() => matches.find((m) => !m.played), [matches]);
+  const groupMatches = useMemo(() => matches.filter((m) => m.group !== null), [matches]);
+  const koMatches    = useMemo(() => matches.filter((m) => m.round !== null), [matches]);
+  const jornadas     = useMemo(() => [...new Set(groupMatches.map((m) => m.jornada))].sort((a, b) => a - b), [groupMatches]);
+  const sfMatches    = useMemo(() => koMatches.filter((m) => m.round === 'SF1' || m.round === 'SF2'), [koMatches]);
+  const finalMatches = useMemo(() => koMatches.filter((m) => m.round === 'F'   || m.round === '3P'),  [koMatches]);
+  const nextMatch    = useMemo(() => matches.find((m) => !m.played), [matches]);
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: T.bg, paddingBottom: 30 }} className="scroll-hide">
       {nextMatch && <NextMatchCard match={nextMatch} T={T} />}
 
       <div style={{ padding: '6px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Eyebrow size={10} color={T.mute} T={T}>Jornadas</Eyebrow>
+        <Eyebrow size={10} color={T.mute} T={T}>Calendário</Eyebrow>
         <Eyebrow size={10} color={T.mute2} T={T}>
           {matches.filter((m) => m.played).length}/{matches.length} jogos disputados
         </Eyebrow>
@@ -34,12 +38,19 @@ export function CalendarPage({ matches, isAdmin, onEditMatch, onAddMatch, T }: P
         <Jornada
           key={num}
           num={num}
-          matches={matches.filter((m) => m.jornada === num)}
+          matches={groupMatches.filter((m) => m.jornada === num)}
           isAdmin={isAdmin}
           onEditMatch={onEditMatch}
           T={T}
         />
       ))}
+
+      {sfMatches.length > 0 && (
+        <KOSection title="Meias-Finais" matches={sfMatches} isAdmin={isAdmin} onEditMatch={onEditMatch} T={T} />
+      )}
+      {finalMatches.length > 0 && (
+        <KOSection title="Final e 3.º/4.º Lugar" matches={finalMatches} isAdmin={isAdmin} onEditMatch={onEditMatch} T={T} />
+      )}
 
       {isAdmin && (
         <div style={{ padding: '18px 20px 0' }}>
@@ -111,6 +122,27 @@ function NextMatchCard({ match, T }: { match: Match; T: ThemeColors }) {
             <div className="mono" style={{ fontSize: 10, color: T.mute2, letterSpacing: 1 }}>{fmtDateLong(match.date)}</div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function KOSection({ title, matches, isAdmin, onEditMatch, T }: { title: string; matches: Match[]; isAdmin: boolean; onEditMatch: (id: string) => void; T: ThemeColors }) {
+  const date = matches[0]?.date;
+  const allPlayed = matches.every((m) => m.played);
+  return (
+    <div style={{ marginTop: 20, padding: '0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 10px' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <div style={{ fontWeight: 700, fontSize: 22, color: T.text, letterSpacing: -0.8 }}>{title}</div>
+          {!allPlayed && <Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill>}
+        </div>
+        <Eyebrow size={10} color={T.mute2} T={T}>{date ? fmtDateLong(date) : ''}</Eyebrow>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {matches.map((m) => (
+          <MatchCard key={m.id} match={m} isAdmin={isAdmin} onEdit={() => onEditMatch(m.id)} T={T} />
+        ))}
       </div>
     </div>
   );
