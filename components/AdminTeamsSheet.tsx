@@ -163,10 +163,9 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
   const teams = useTeams();
   const [name, setName] = useState(initial?.name ?? '');
   const [team, setTeam] = useState(initial?.team ?? '');
-  const [n, setN] = useState(initial?.n ? String(initial.n) : '');
   const [saving, setSaving] = useState(false);
 
-  const valid = name.trim() && team && n;
+  const valid = name.trim() && team;
   const teamOptions = Object.values(teams).map((t) => ({ value: t.code, label: `${t.code} — ${t.name}` }));
 
   async function submit(e?: FormEvent) {
@@ -176,9 +175,9 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
     try {
       const id = isNew ? 'p_' + Math.random().toString(36).slice(2, 8) : initial!.id;
       if (isNew) {
-        await api('/api/players', 'POST', { id, name, team, n: parseInt(n) });
+        await api('/api/players', 'POST', { id, name, team });
       } else {
-        await api(`/api/players/${initial!.id}`, 'PATCH', { name, team, n: parseInt(n) });
+        await api(`/api/players/${initial!.id}`, 'PATCH', { name, team });
       }
       showToast(isNew ? 'Jogador adicionado' : 'Jogador guardado');
       onSave();
@@ -196,9 +195,6 @@ function PlayerForm({ initial, isNew, onSave, onCancel, T }: {
       </Field>
       <Field label="Equipa" T={T}>
         <Select value={team} onChange={setTeam} options={teamOptions} T={T} />
-      </Field>
-      <Field label="Número de camisola" T={T}>
-        <Input T={T} type="number" min="1" max="99" value={n} onChange={(e) => setN(e.target.value)} placeholder="10" />
       </Field>
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <Btn T={T} onClick={onCancel}>Cancelar</Btn>
@@ -245,7 +241,7 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
   }
 
   const teamList = Object.values(teams).sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
-  const playerList = Object.values(players).sort((a, b) => a.team.localeCompare(b.team) || a.n - b.n);
+  const playerList = Object.values(players).sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 40, background: T.bg, display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
@@ -345,7 +341,6 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
                       background: T.surf, border: `1px solid ${T.line}`, borderRadius: 12,
                     }}>
                       <div style={{ width: 14, height: 14, borderRadius: 4, background: team?.color ?? T.mute2, flexShrink: 0 }} />
-                      <div className="mono" style={{ fontSize: 11, color: T.mute2, width: 26, textAlign: 'center' }}>#{player.n}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 500, fontSize: 14, color: T.text }}>{player.name}</div>
                         <div style={{ fontSize: 11, color: T.mute, marginTop: 1 }}>{team?.name ?? player.team}</div>

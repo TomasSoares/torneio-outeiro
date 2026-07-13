@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server'
 import pool from '@/lib/db'
 import { isAdminRequest } from '@/lib/auth'
 import type { Player } from '@/lib/types'
-import { bad, isStr, isInt, parseBody } from '@/lib/validate'
+import { bad, isStr, parseBody } from '@/lib/validate'
 
 export async function GET() {
   try {
     const { rows } = await pool.query(
-      `SELECT id, name, team_code AS team, jersey_num AS n FROM players ORDER BY team_code, jersey_num`
+      `SELECT id, name, team_code AS team FROM players ORDER BY team_code, name`
     )
     const map = Object.fromEntries(rows.map((p: Player) => [p.id, p]))
     return NextResponse.json(map)
@@ -23,16 +23,15 @@ export async function POST(req: Request) {
   const [body, err] = await parseBody(req)
   if (err) return err
 
-  const { id, name, team, n } = body
+  const { id, name, team } = body
   if (!isStr(id, 20)) return bad('ID inválido')
   if (!isStr(name, 80)) return bad('Nome inválido (1–80 caracteres)')
   if (!isStr(team, 4)) return bad('Equipa inválida')
-  if (!isInt(n, 1, 99)) return bad('Número de camisola inválido (1–99)')
 
   try {
     await pool.query(
-      `INSERT INTO players (id, name, team_code, jersey_num) VALUES ($1,$2,$3,$4)`,
-      [(id as string).trim(), (name as string).trim(), (team as string).trim(), n]
+      `INSERT INTO players (id, name, team_code) VALUES ($1,$2,$3)`,
+      [(id as string).trim(), (name as string).trim(), (team as string).trim()]
     )
     return NextResponse.json({ ok: true })
   } catch (err: unknown) {

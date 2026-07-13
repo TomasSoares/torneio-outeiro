@@ -190,7 +190,7 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
                   {s.player.name}
                 </div>
                 <div style={{ marginTop: 4 }}>
-                  <div className="mono" style={{ fontSize: 9, color: T.mute2, letterSpacing: 0.6 }}>{team.code} · #{s.player.n}</div>
+                  <div className="mono" style={{ fontSize: 9, color: T.mute2, letterSpacing: 0.6 }}>{team.code}</div>
                 </div>
               </div>
               <div style={{ fontSize: 20, fontWeight: 700, color: T.text, minWidth: 26, textAlign: 'right', letterSpacing: -0.5 }}>{s.count}</div>
@@ -225,7 +225,6 @@ function TopScorerCard({ scorer, T }: { scorer: { player: { id: string; name: st
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
             <Badge code={scorer.player.team} size={22} T={T} />
             <div style={{ fontSize: 13, color: T.mute }}>{team.name}</div>
-            <div className="mono" style={{ fontSize: 10, color: T.mute2, marginLeft: 4 }}>#{scorer.player.n}</div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>

@@ -46,7 +46,6 @@ export interface Player {
   id: string;
   name: string;
   team: string;
-  n: number;
 }
 
 export interface StandingRow {

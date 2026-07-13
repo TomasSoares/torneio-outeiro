@@ -463,7 +463,6 @@ function ScorerPicker({ homeTeam, awayTeam, onCancel, onPick, T }: { homeTeam: s
                 border: 'none', borderBottom: `1px solid ${T.line}`, textAlign: 'left',
               }}
             >
-              <div className="mono" style={{ width: 22, fontSize: 11, color: T.mute2, textAlign: 'center' }}>#{p.n}</div>
               <div style={{ fontSize: 14, fontWeight: 500, color: T.text, flex: 1 }}>{p.name}</div>
               <div style={{ color: T.lime, fontSize: 12, fontWeight: 600 }}>+ golo</div>
             </button>
