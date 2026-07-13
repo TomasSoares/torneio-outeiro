@@ -132,10 +132,10 @@ function KOSection({ title, matches, isAdmin, onEditMatch, T }: { title: string;
   const allPlayed = matches.every((m) => m.played);
   return (
     <div style={{ marginTop: 20, padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0 4px 10px' }}>
+        <div>
           <div style={{ fontWeight: 700, fontSize: 22, color: T.text, letterSpacing: -0.8 }}>{title}</div>
-          {!allPlayed && <Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill>}
+          {!allPlayed && <div style={{ marginTop: 6 }}><Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill></div>}
         </div>
         <Eyebrow size={10} color={T.mute2} T={T}>{date ? fmtDateLong(date) : ''}</Eyebrow>
       </div>
@@ -153,10 +153,10 @@ function Jornada({ num, matches, isAdmin, onEditMatch, T }: { num: number; match
   const allPlayed = matches.every((m) => m.played);
   return (
     <div style={{ marginTop: 20, padding: '0 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0 4px 10px' }}>
+        <div>
           <div style={{ fontWeight: 700, fontSize: 22, color: T.text, letterSpacing: -0.8 }}>Jornada {num}</div>
-          {!allPlayed && <Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill>}
+          {!allPlayed && <div style={{ marginTop: 6 }}><Pill color={T.lime} bg={T.limeDim} T={T}>por jogar</Pill></div>}
         </div>
         <Eyebrow size={10} color={T.mute2} T={T}>{date ? fmtDateLong(date) : ''}</Eyebrow>
       </div>
