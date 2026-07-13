@@ -113,12 +113,10 @@ export function App() {
   const maxJornada = useMemo(() => matches.reduce((mx, m) => Math.max(mx, m.jornada), 0), [matches]);
   const phase = useMemo(() => detectPhase(matches), [matches]);
 
-  // Auto-switch para o bracket quando a fase final começar
+  // Auto-switch para o bracket apenas quando a fase final começa pela primeira vez
   useEffect(() => {
-    if (phase === 'knockout' && page === 'table') {
-      setPage('bracket');
-    }
-  }, [phase, page]);
+    if (phase === 'knockout') setPage('bracket');
+  }, [phase]);
 
   async function saveMatch(updated: Match) {
     try {

@@ -67,7 +67,7 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: 16 }}>⚡</span> Gerar Fase Final
+            Gerar Fase Final
           </button>
           <div style={{ marginTop: 8, fontSize: 12, color: T.mute2, textAlign: 'center' }}>
             Irá criar as meias-finais com base na classificação dos grupos
@@ -78,7 +78,7 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
       {/* Se não há jogos KO ainda e o admin não pode gerar (nem todos disputados) */}
       {!hasKO && !showGenerateKO && (
         <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
+
           <div style={{ fontSize: 16, fontWeight: 600, color: T.text, letterSpacing: -0.3 }}>
             Fase de grupos em curso
           </div>
@@ -91,53 +91,8 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
       {/* Bracket */}
       {hasKO && (
         <>
-          {/* Mobile: stack vertical */}
           <div className="bracket-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 16px' }}>
-            {/* Meias-finais */}
-            <div>
-              <Eyebrow size={9} color={T.mute3} style={{ paddingLeft: 4, paddingBottom: 8 }} T={T}>
-                Meias-Finais
-              </Eyebrow>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <BracketMatchCard
-                  match={bracket.sf1Match}
-                  home={bracket.sf1Home}
-                  away={bracket.sf1Away}
-                  label="Meia-Final 1"
-                  isAdmin={isAdmin}
-                  onEdit={bracket.sf1Match ? () => onEditMatch(bracket.sf1Match!.id) : undefined}
-                  T={T}
-                />
-                <BracketMatchCard
-                  match={bracket.sf2Match}
-                  home={bracket.sf2Home}
-                  away={bracket.sf2Away}
-                  label="Meia-Final 2"
-                  isAdmin={isAdmin}
-                  onEdit={bracket.sf2Match ? () => onEditMatch(bracket.sf2Match!.id) : undefined}
-                  T={T}
-                />
-              </div>
-            </div>
-
-            {/* Admin: gerar Final */}
-            {showGenerateFinals && (
-              <button
-                onClick={onGenerateFinals}
-                style={{
-                  width: '100%', padding: 14,
-                  background: T.lime, color: T.bg,
-                  border: 'none', borderRadius: 100,
-                  fontWeight: 600, fontSize: 14, letterSpacing: -0.2,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  cursor: 'pointer',
-                }}
-              >
-                <span style={{ fontSize: 16 }}>🏆</span> Gerar Final e 3.º/4.º Lugar
-              </button>
-            )}
-
-            {/* Final e 3º/4º */}
+            {/* Final e 3º/4º — aparecem primeiro quando existem */}
             {(bracket.fMatch || bracket.tpMatch || showGenerateFinals) && (
               <div>
                 <Eyebrow size={9} color={T.mute3} style={{ paddingLeft: 4, paddingBottom: 8 }} T={T}>
@@ -166,6 +121,50 @@ export function BracketPage({ matches, isAdmin, onEditMatch, onGenerateKO, onGen
                 </div>
               </div>
             )}
+
+            {/* Admin: gerar Final */}
+            {showGenerateFinals && (
+              <button
+                onClick={onGenerateFinals}
+                style={{
+                  width: '100%', padding: 14,
+                  background: T.lime, color: T.bg,
+                  border: 'none', borderRadius: 100,
+                  fontWeight: 600, fontSize: 14, letterSpacing: -0.2,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  cursor: 'pointer',
+                }}
+              >
+                Gerar Final e 3.º/4.º Lugar
+              </button>
+            )}
+
+            {/* Meias-finais */}
+            <div>
+              <Eyebrow size={9} color={T.mute3} style={{ paddingLeft: 4, paddingBottom: 8 }} T={T}>
+                Meias-Finais
+              </Eyebrow>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <BracketMatchCard
+                  match={bracket.sf1Match}
+                  home={bracket.sf1Home}
+                  away={bracket.sf1Away}
+                  label="Meia-Final 1"
+                  isAdmin={isAdmin}
+                  onEdit={bracket.sf1Match ? () => onEditMatch(bracket.sf1Match!.id) : undefined}
+                  T={T}
+                />
+                <BracketMatchCard
+                  match={bracket.sf2Match}
+                  home={bracket.sf2Home}
+                  away={bracket.sf2Away}
+                  label="Meia-Final 2"
+                  isAdmin={isAdmin}
+                  onEdit={bracket.sf2Match ? () => onEditMatch(bracket.sf2Match!.id) : undefined}
+                  T={T}
+                />
+              </div>
+            </div>
           </div>
         </>
       )}
@@ -310,7 +309,6 @@ function KOTeamLine({ slot, winner, dimmed, T }: { slot: KOSlot; winner: boolean
         {slot.label}
       </div>
       {winner && (
-        <div style={{ fontSize: 14, flexShrink: 0 }}>🏆</div>
       )}
     </div>
   );
