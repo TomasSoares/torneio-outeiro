@@ -207,7 +207,7 @@ function ScorersTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
   );
 }
 
-function TopScorerCard({ scorer, T }: { scorer: { player: { id: string; name: string; team: string; n: number }; count: number }; T: ThemeColors }) {
+function TopScorerCard({ scorer, T }: { scorer: { player: { id: string; name: string; team: string }; count: number }; T: ThemeColors }) {
   const teams = useTeams();
   const team = teams[scorer.player.team];
   return (
