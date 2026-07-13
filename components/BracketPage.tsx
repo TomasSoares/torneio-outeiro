@@ -308,8 +308,6 @@ function KOTeamLine({ slot, winner, dimmed, T }: { slot: KOSlot; winner: boolean
       }}>
         {slot.label}
       </div>
-      {winner && (
-      )}
     </div>
   );
 }
