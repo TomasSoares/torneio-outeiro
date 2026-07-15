@@ -17,7 +17,6 @@ import { AdminTeamsPage } from './AdminTeamsSheet';
 import { LoginSheet, EditMatchSheet, AddMatchSheet } from './AdminSheets';
 
 const SESSION_KEY = 'torneio-outeiro-admin-v2';
-const THEME_KEY   = 'torneio-outeiro-theme-v2';
 
 type Page = 'table' | 'bracket' | 'calendar' | 'admin';
 
@@ -40,7 +39,7 @@ export function App() {
   const [players, setPlayers] = useState<Record<string, Player>>(PLAYERS);
   const [page, setPage] = useState<Page>('table');
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>('light');
   const [hydrated, setHydrated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [editMatchId, setEditMatchId] = useState<string | null>(null);
@@ -76,7 +75,6 @@ export function App() {
   useEffect(() => {
     try {
       setIsAdmin(sessionStorage.getItem(SESSION_KEY) === '1');
-      setTheme((localStorage.getItem(THEME_KEY) as Theme) || 'dark');
     } catch {}
     setHydrated(true);
   }, []);
@@ -105,7 +103,6 @@ export function App() {
 
   useEffect(() => {
     if (!hydrated) return;
-    try { localStorage.setItem(THEME_KEY, theme); } catch {}
     document.body.style.background = T.bg;
   }, [theme, T.bg, hydrated]);
 
