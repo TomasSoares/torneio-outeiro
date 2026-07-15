@@ -72,17 +72,15 @@ export function Sidebar({ page, onChange, isAdmin, phase, theme, onToggleTheme, 
     >
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 4, marginBottom: 36 }}>
-        <div
+        <img
+          src="/logo.jpeg"
+          alt="Torneio Outeiro"
           style={{
             width: 32, height: 32, borderRadius: 9,
-            background: T.lime, color: T.bg,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: 18, letterSpacing: -0.5,
+            objectFit: 'cover',
             flexShrink: 0,
           }}
-        >
-          T
-        </div>
+        />
         <div>
           <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: -0.3, color: T.text, lineHeight: 1 }}>
             Torneio Outeiro

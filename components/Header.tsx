@@ -25,16 +25,14 @@ export function Header({ isAdmin, theme, onToggleTheme, onLogin, onLogout, T }: 
       >
         {/* Wordmark */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
+          <img
+            src="/logo.jpeg"
+            alt="Torneio Outeiro"
             style={{
               width: 30, height: 30, borderRadius: 8,
-              background: T.lime, color: T.bg,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, fontSize: 17, letterSpacing: -0.5,
+              objectFit: 'cover',
             }}
-          >
-            T
-          </div>
+          />
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: -0.3, color: T.text, lineHeight: 1 }}>
               Torneio Outeiro
