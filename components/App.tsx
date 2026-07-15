@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Match, Team, Player, Theme } from '@/lib/types';
-import { TEAMS, PLAYERS } from '@/lib/data';
 import { V2_DARK, V2_LIGHT } from '@/lib/theme';
 import { detectPhase } from '@/lib/helpers';
 import { AppCtx } from '@/lib/context';
@@ -35,8 +34,8 @@ async function apiCall(url: string, method: string, body?: unknown) {
 
 export function App() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [teams, setTeams] = useState<Record<string, Team>>(TEAMS);
-  const [players, setPlayers] = useState<Record<string, Player>>(PLAYERS);
+  const [teams, setTeams] = useState<Record<string, Team>>({});
+  const [players, setPlayers] = useState<Record<string, Player>>({});
   const [page, setPage] = useState<Page>('table');
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [theme, setTheme] = useState<Theme>('light');
