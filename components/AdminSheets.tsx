@@ -348,7 +348,7 @@ function ScoreSide({ team, score, setScore, T }: { team: string; score: string; 
         <div style={{ fontSize: 12, fontWeight: 500, color: T.text }}>{t.short}</div>
       </div>
       <input
-        type="number" inputMode="numeric"
+        type="number" inputMode="numeric" min={0}
         value={score}
         onChange={(e) => setScore(e.target.value.replace(/[^\d]/g, ''))}
         placeholder="—"
