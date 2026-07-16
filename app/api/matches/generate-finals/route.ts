@@ -60,16 +60,15 @@ export async function POST() {
     const sf2Winner = sf2.hs > sf2.as_ ? sf2.home : sf2.away
     const sf2Loser  = sf2.hs > sf2.as_ ? sf2.away : sf2.home
 
-    // Data placeholder — admin pode editar depois
-    const fDate  = '2026-06-14'
+    const fDate  = '2026-07-19'
     const fVenue = 'Saibreira'
 
     await client.query(
       `INSERT INTO matches
         (id, jornada, "group", round, match_date, match_time, home_code, away_code, played, venue)
        VALUES
-        ($1, 5, NULL, 'F',  $2, '17:00', $3, $4, FALSE, $5),
-        ($6, 5, NULL, '3P', $2, '15:00', $7, $8, FALSE, $5)`,
+        ($1, 5, NULL, 'F',  $2, '18:00', $3, $4, FALSE, $5),
+        ($6, 5, NULL, '3P', $2, '17:00', $7, $8, FALSE, $5)`,
       ['ko_f', fDate, sf1Winner, sf2Winner, fVenue, 'ko_3p', sf1Loser, sf2Loser]
     )
 

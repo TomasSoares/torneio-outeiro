@@ -92,16 +92,15 @@ export async function POST() {
     const sf2Home = standB[0].code
     const sf2Away = standA[1].code
 
-    // Data e hora placeholder — admin pode editar depois
-    const sfDate  = '2026-06-07'
+    const sfDate  = '2026-07-19'
     const sfVenue = 'Saibreira'
 
     await client.query(
       `INSERT INTO matches
         (id, jornada, "group", round, match_date, match_time, home_code, away_code, played, venue)
        VALUES
-        ($1, 4, NULL, 'SF1', $2, '17:00', $3, $4, FALSE, $5),
-        ($6, 4, NULL, 'SF2', $2, '19:00', $7, $8, FALSE, $5)`,
+        ($1, 4, NULL, 'SF1', $2, '15:00', $3, $4, FALSE, $5),
+        ($6, 4, NULL, 'SF2', $2, '16:00', $7, $8, FALSE, $5)`,
       ['ko_sf1', sfDate, sf1Home, sf1Away, sfVenue, 'ko_sf2', sf2Home, sf2Away]
     )
 
