@@ -210,6 +210,8 @@ export function EditMatchSheet({
   const h = TEAMS[match.home], a = TEAMS[match.away];
   const hsN = parseInt(hs, 10), asN = parseInt(as, 10);
   const scoreValid = !isNaN(hsN) && !isNaN(asN) && hsN >= 0 && asN >= 0;
+  const scoreEmpty = hs.trim() === '' && as.trim() === '';
+  const canSave = scoreValid || (!match.played && scoreEmpty);
 
   const homeScorers = scorers.filter((s) => s.t === match.home);
   const awayScorers = scorers.filter((s) => s.t === match.away);
@@ -223,7 +225,12 @@ export function EditMatchSheet({
   function removeScorer(idx: number) { setScorers(scorers.filter((_, i) => i !== idx)); }
 
   function save() {
-    if (!scoreValid) return;
+    if (!canSave) return;
+    if (!scoreValid) {
+      // Sem resultado ainda: apenas atualiza data/hora/recinto, sem marcar como jogado.
+      onSave({ ...match, date, time, venue });
+      return;
+    }
     const m = new Map<string, { p: string; t: string; c: number; min: number | null }>();
     for (const s of scorers) {
       const key = s.p + '|' + (s.min ?? '');
@@ -298,8 +305,8 @@ export function EditMatchSheet({
 
       {/* Actions */}
       <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${T.line}` }}>
-        <Btn T={T} primary onClick={save} disabled={!scoreValid}>
-          {match.played ? 'Guardar alterações' : 'Lançar resultado'}
+        <Btn T={T} primary onClick={save} disabled={!canSave}>
+          {match.played || !scoreValid ? 'Guardar alterações' : 'Lançar resultado'}
         </Btn>
         {match.played && (
           <Btn T={T} onClick={() => onSave({ ...match, played: false, hs: null, as: null, scorers: [] })}>

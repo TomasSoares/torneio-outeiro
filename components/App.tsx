@@ -116,10 +116,12 @@ export function App() {
 
   async function saveMatch(updated: Match) {
     try {
+      const prev = matches.find((m) => m.id === updated.id);
       await apiCall(`/api/matches/${updated.id}`, 'PATCH', updated);
       setMatches(matches.map((m) => (m.id === updated.id ? updated : m)));
       setEditMatchId(null);
-      showToast(updated.played ? 'Resultado guardado' : 'Resultado anulado');
+      const msg = updated.played ? 'Resultado guardado' : prev?.played ? 'Resultado anulado' : 'Alterações guardadas';
+      showToast(msg);
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Erro ao guardar', 'error');
     }
