@@ -58,6 +58,12 @@ export function computeStandings(matches: Match[], teamsMap: Record<string, Team
   return rows;
 }
 
+/** Ranking de melhor defesa: menos golos sofridos primeiro (só equipas com jogos disputados). */
+export function computeBestDefense(matches: Match[], teamsMap: Record<string, Team> = TEAMS): StandingRow[] {
+  const rows = computeStandings(matches, teamsMap).filter((r) => r.J > 0);
+  return rows.sort((a, b) => a.GS - b.GS || b.J - a.J || a.name.localeCompare(b.name));
+}
+
 // ---------------------------------------------------------------------------
 
 export function computeTopScorers(matches: Match[], playersMap: Record<string, Player> = PLAYERS): TopScorer[] {
