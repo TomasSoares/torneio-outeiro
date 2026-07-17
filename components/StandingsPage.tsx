@@ -46,6 +46,12 @@ export function StandingsPage({ matches, T }: Props) {
   );
 }
 
+const MEDALS = [
+  { rgb: '212,175,55', text: '#D4AF37' }, // ouro
+  { rgb: '156,163,175', text: '#9CA3AF' }, // prata
+  { rgb: '184,115,51', text: '#B87333' }, // bronze
+];
+
 function StandingsTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
   const teams = useTeams();
   const rows = useMemo(() => computeStandings(matches, teams), [matches, teams]);
@@ -68,35 +74,42 @@ function StandingsTab({ matches, T }: { matches: Match[]; T: ThemeColors }) {
           ))}
         </div>
 
-        {rows.map((r, i) => (
-          <div
-            key={r.code}
-            className="standings-row"
-            style={{
-              padding: '12px 10px', marginBottom: 6,
-              display: 'grid',
-              gap: 6, alignItems: 'center',
-              background: T.surf, borderRadius: 12,
-              border: `1px solid ${T.line}`,
-              position: 'relative',
-            }}
-          >
-            <div className="mono" style={{ fontSize: 13, fontWeight: 600, color: T.mute, textAlign: 'center' }}>{i + 1}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-              <Badge code={r.code} size={24} T={T} />
-              <div style={{ fontWeight: 600, fontSize: 13, color: T.text, letterSpacing: -0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-                {r.short}
+        {rows.map((r, i) => {
+          const medal = MEDALS[i];
+          return (
+            <div
+              key={r.code}
+              className="standings-row"
+              style={{
+                padding: '12px 10px', marginBottom: 6,
+                display: 'grid',
+                gap: 6, alignItems: 'center',
+                background: T.surf, borderRadius: 12,
+                border: `1px solid ${medal ? `rgba(${medal.rgb},0.35)` : T.line}`,
+                position: 'relative',
+                boxShadow: medal ? `0 0 24px rgba(${medal.rgb},0.08)` : 'none',
+              }}
+            >
+              {medal && (
+                <div style={{ position: 'absolute', left: -1, top: 8, bottom: 8, width: 3, background: medal.text, borderRadius: 2 }} />
+              )}
+              <div className="mono" style={{ fontSize: 13, fontWeight: 600, color: medal ? medal.text : T.mute, textAlign: 'center' }}>{i + 1}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                <Badge code={r.code} size={24} T={T} />
+                <div style={{ fontWeight: 600, fontSize: 13, color: T.text, letterSpacing: -0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                  {r.short}
+                </div>
               </div>
+              {(['V', 'E', 'D', 'GM', 'GS'] as const).map((k) => (
+                <div key={k} className="mono" style={{ fontSize: 13, fontWeight: 500, color: T.mute, textAlign: 'center' }}>{r[k]}</div>
+              ))}
+              <div className="mono" style={{ fontSize: 13, fontWeight: 500, textAlign: 'center', color: r.DG > 0 ? T.lime : r.DG < 0 ? T.loss : T.mute }}>
+                {r.DG > 0 ? '+' + r.DG : r.DG}
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 700, textAlign: 'center', color: T.text, letterSpacing: -0.5 }}>{r.PTS}</div>
             </div>
-            {(['V', 'E', 'D', 'GM', 'GS'] as const).map((k) => (
-              <div key={k} className="mono" style={{ fontSize: 13, fontWeight: 500, color: T.mute, textAlign: 'center' }}>{r[k]}</div>
-            ))}
-            <div className="mono" style={{ fontSize: 13, fontWeight: 500, textAlign: 'center', color: r.DG > 0 ? T.lime : r.DG < 0 ? T.loss : T.mute }}>
-              {r.DG > 0 ? '+' + r.DG : r.DG}
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, textAlign: 'center', color: T.text, letterSpacing: -0.5 }}>{r.PTS}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
