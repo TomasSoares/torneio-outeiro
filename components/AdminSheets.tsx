@@ -244,7 +244,7 @@ export function EditMatchSheet({
     <Sheet onClose={onClose} title={`${h.short} vs ${a.short}`} eyebrow={
       match.round
         ? ({ SF1: 'Meia-Final 1', SF2: 'Meia-Final 2', F: 'Final', '3P': '3.º/4.º Lugar' } as Record<string, string>)[match.round] ?? match.round
-        : `Jornada ${match.jornada} · Grupo ${match.group}`
+        : `Jornada ${match.jornada}`
     } T={T}>
       {/* Meta */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
@@ -484,7 +484,6 @@ function ScorerPicker({ homeTeam, awayTeam, onCancel, onPick, T }: { homeTeam: s
 
 export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose: () => void; onAdd: (m: Match) => void; suggestedJornada: number; T: ThemeColors }) {
   const TEAMS = useTeams();
-  const [group, setGroup] = useState<'A' | 'B'>('A');
   const [home, setHome] = useState('');
   const [away, setAway] = useState('');
   const [date, setDate] = useState('2026-05-25');
@@ -492,7 +491,7 @@ export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose
   const [venue, setVenue] = useState('Saibreira');
   const [jornada, setJornada] = useState(String(suggestedJornada || 4));
 
-  const teams = Object.values(TEAMS).filter((t) => t.group === group);
+  const teams = Object.values(TEAMS);
   const canSave = home && away && home !== away && date && time && venue && jornada;
 
   function submit() {
@@ -500,33 +499,13 @@ export function AddMatchSheet({ onClose, onAdd, suggestedJornada, T }: { onClose
     onAdd({
       id: 'm_' + Math.random().toString(36).slice(2, 8),
       jornada: parseInt(jornada, 10) || 1,
-      group, round: null, date, time, home, away, venue,
+      group: 'A', round: null, date, time, home, away, venue,
       played: false, hs: null, as: null, scorers: [],
     });
   }
 
   return (
     <Sheet onClose={onClose} title="Novo jogo" eyebrow="Adicionar partida" T={T}>
-      <Field label="Grupo" T={T}>
-        <div style={{ display: 'flex', gap: 4, padding: 4, background: T.surf, borderRadius: 100, border: `1px solid ${T.line}` }}>
-          {(['A', 'B'] as const).map((g) => (
-            <button
-              key={g}
-              onClick={() => { setGroup(g); setHome(''); setAway(''); }}
-              style={{
-                flex: 1, padding: '8px',
-                background: group === g ? T.lime : 'transparent',
-                color: group === g ? T.bg : T.mute,
-                border: 'none', borderRadius: 100,
-                fontWeight: 600, fontSize: 13,
-              }}
-            >
-              Grupo {g}
-            </button>
-          ))}
-        </div>
-      </Field>
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <Field label="Casa" T={T}>
           <Select2 value={home} teams={teams.filter((t) => t.code !== away)} onChange={setHome} T={T} />

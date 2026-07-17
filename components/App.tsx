@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { Match, Team, Player, Theme } from '@/lib/types';
 import { V2_DARK, V2_LIGHT } from '@/lib/theme';
-import { detectPhase } from '@/lib/helpers';
 import { AppCtx } from '@/lib/context';
 import { ToastBar, type ToastState } from './primitives';
 import { Header } from './Header';
@@ -11,13 +10,12 @@ import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
 import { StandingsPage } from './StandingsPage';
 import { CalendarPage } from './CalendarPage';
-import { BracketPage } from './BracketPage';
 import { AdminTeamsPage } from './AdminTeamsSheet';
 import { LoginSheet, EditMatchSheet, AddMatchSheet } from './AdminSheets';
 
 const SESSION_KEY = 'torneio-outeiro-admin-v2';
 
-type Page = 'table' | 'bracket' | 'calendar' | 'admin';
+type Page = 'table' | 'calendar' | 'admin';
 
 async function apiCall(url: string, method: string, body?: unknown) {
   const res = await fetch(url, {
@@ -107,12 +105,6 @@ export function App() {
 
   const editingMatch = useMemo(() => matches.find((m) => m.id === editMatchId) ?? null, [matches, editMatchId]);
   const maxJornada = useMemo(() => matches.reduce((mx, m) => Math.max(mx, m.jornada), 0), [matches]);
-  const phase = useMemo(() => detectPhase(matches), [matches]);
-
-  // Auto-switch para o bracket apenas quando a fase final começa pela primeira vez
-  useEffect(() => {
-    if (phase === 'knockout') setPage('bracket');
-  }, [phase]);
 
   async function saveMatch(updated: Match) {
     try {
@@ -152,30 +144,9 @@ export function App() {
     }
   }
 
-  async function handleGenerateKO() {
-    try {
-      await apiCall('/api/matches/generate-ko', 'POST');
-      await reloadMatches();
-      setPage('bracket');
-      showToast('Fase final gerada');
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : 'Erro ao gerar fase final', 'error');
-    }
-  }
-
-  async function handleGenerateFinals() {
-    try {
-      await apiCall('/api/matches/generate-finals', 'POST');
-      await reloadMatches();
-      showToast('Final e 3.º/4.º lugar gerados');
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : 'Erro ao gerar final', 'error');
-    }
-  }
-
   const sharedNavProps = {
     page, onChange: (p: Page) => setPage(p),
-    isAdmin, phase, theme,
+    isAdmin, theme,
     onToggleTheme: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
     onLogin: () => setShowLogin(true),
     onLogout: () => {
@@ -189,16 +160,6 @@ export function App() {
   const pageContent = (
     <>
       {page === 'table' && <StandingsPage matches={matches} T={T} />}
-      {page === 'bracket' && (
-        <BracketPage
-          matches={matches}
-          isAdmin={isAdmin}
-          onEditMatch={setEditMatchId}
-          onGenerateKO={handleGenerateKO}
-          onGenerateFinals={handleGenerateFinals}
-          T={T}
-        />
-      )}
       {page === 'calendar' && (
         <CalendarPage matches={matches} isAdmin={isAdmin} onEditMatch={setEditMatchId} onAddMatch={() => setShowAddMatch(true)} T={T} />
       )}
@@ -226,7 +187,7 @@ export function App() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {pageContent}
             </div>
-            <BottomNav page={page} onChange={(p) => setPage(p)} isAdmin={isAdmin} phase={phase} T={T} />
+            <BottomNav page={page} onChange={(p) => setPage(p)} isAdmin={isAdmin} T={T} />
           </div>
         )}
 

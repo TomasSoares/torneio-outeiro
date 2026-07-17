@@ -87,7 +87,6 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
   const [code, setCode] = useState(initial?.code ?? '');
   const [name, setName] = useState(initial?.name ?? '');
   const [short, setShort] = useState(initial?.short ?? '');
-  const [group, setGroup] = useState<'A' | 'B'>(initial?.group ?? 'A');
   const [color, setColor] = useState(initial?.color ?? '#1a6b3a');
   const [saving, setSaving] = useState(false);
 
@@ -99,9 +98,9 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
     setSaving(true);
     try {
       if (isNew) {
-        await api('/api/teams', 'POST', { code: code.toUpperCase(), name, short, group, color });
+        await api('/api/teams', 'POST', { code: code.toUpperCase(), name, short, group: 'A', color });
       } else {
-        await api(`/api/teams/${initial!.code}`, 'PATCH', { code: code.toUpperCase(), name, short, group, color });
+        await api(`/api/teams/${initial!.code}`, 'PATCH', { code: code.toUpperCase(), name, short, group: 'A', color });
       }
       showToast(isNew ? 'Equipa adicionada' : 'Equipa guardada');
       onSave();
@@ -122,19 +121,6 @@ function TeamForm({ initial, isNew, onSave, onCancel, T }: {
       </Field>
       <Field label="Nome curto" T={T}>
         <Input T={T} value={short} onChange={(e) => setShort(e.target.value)} placeholder="Carvalhos" />
-      </Field>
-      <Field label="Grupo" T={T}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {(['A', 'B'] as const).map((g) => (
-            <button key={g} type="button" onClick={() => setGroup(g)} style={{
-              flex: 1, padding: '10px', borderRadius: 10,
-              background: group === g ? T.lime : T.surf,
-              color: group === g ? T.bg : T.mute,
-              border: `1px solid ${group === g ? T.lime : T.line2}`,
-              fontWeight: 600, fontSize: 14,
-            }}>Grupo {g}</button>
-          ))}
-        </div>
       </Field>
       <Field label="Cor" T={T}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -240,7 +226,7 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
     }
   }
 
-  const teamList = Object.values(teams).sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name));
+  const teamList = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name));
   const playerList = Object.values(players).sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
 
   return (
@@ -297,7 +283,7 @@ export function AdminTeamsPage({ onClose, T }: { onClose: () => void; T: ThemeCo
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 14, color: T.text }}>{team.name}</div>
                       <div style={{ fontSize: 11, color: T.mute, marginTop: 2 }}>
-                        <span className="mono">{team.code}</span> · Grupo {team.group} · {team.short}
+                        <span className="mono">{team.code}</span> · {team.short}
                       </div>
                     </div>
                     <button onClick={() => setEditingTeam(team)} style={{ background: T.surf2, border: `1px solid ${T.line2}`, color: T.mute, padding: '6px 12px', borderRadius: 100, fontSize: 12, fontWeight: 500 }}>Editar</button>
