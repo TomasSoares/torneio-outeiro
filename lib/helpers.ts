@@ -48,14 +48,52 @@ export function computeStandings(matches: Match[], teamsMap: Record<string, Team
   }
 
   rows.forEach((r) => (r.DG = r.GM - r.GS));
-  rows.sort(
-    (a, b) =>
-      b.PTS - a.PTS ||
-      b.DG - a.DG ||
-      b.GM - a.GM ||
-      a.name.localeCompare(b.name)
-  );
-  return rows;
+
+  // Critérios de desempate: 1. pontos, 2. confronto direto (mini-liga entre
+  // as equipas empatadas), 3. diferença de golos geral, 4. golos marcados geral, 5. nome.
+  const byPTS = new Map<number, StandingRow[]>();
+  rows.forEach((r) => {
+    if (!byPTS.has(r.PTS)) byPTS.set(r.PTS, []);
+    byPTS.get(r.PTS)!.push(r);
+  });
+
+  const sorted: StandingRow[] = [];
+  [...byPTS.keys()].sort((a, b) => b - a).forEach((pts) => {
+    const group = byPTS.get(pts)!;
+    if (group.length > 1) {
+      const codes = new Set(group.map((r) => r.code));
+      const h2h = computeHeadToHead(codes, matches);
+      group.sort(
+        (a, b) =>
+          h2h[b.code].pts - h2h[a.code].pts ||
+          h2h[b.code].dg - h2h[a.code].dg ||
+          h2h[b.code].gm - h2h[a.code].gm ||
+          b.DG - a.DG ||
+          b.GM - a.GM ||
+          a.name.localeCompare(b.name)
+      );
+    }
+    sorted.push(...group);
+  });
+
+  return sorted;
+}
+
+/** Mini-liga entre as equipas empatadas em pontos, usando só os jogos entre si (confronto direto). */
+function computeHeadToHead(codes: Set<string>, matches: Match[]): Record<string, { pts: number; dg: number; gm: number }> {
+  const h2h: Record<string, { pts: number; dg: number; gm: number }> = {};
+  codes.forEach((c) => { h2h[c] = { pts: 0, dg: 0, gm: 0 }; });
+
+  for (const m of matches) {
+    if (!m.played || !codes.has(m.home) || !codes.has(m.away)) continue;
+    const h = h2h[m.home], a = h2h[m.away];
+    h.gm += m.hs!; h.dg += m.hs! - m.as!;
+    a.gm += m.as!; a.dg += m.as! - m.hs!;
+    if (m.hs! > m.as!) h.pts += 3;
+    else if (m.hs! < m.as!) a.pts += 3;
+    else { h.pts += 1; a.pts += 1; }
+  }
+  return h2h;
 }
 
 /** Ranking de melhor defesa: menos golos sofridos primeiro (só equipas com jogos disputados). */
